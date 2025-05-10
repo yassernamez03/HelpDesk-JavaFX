@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.helpdesk.controller.SettingsController"
+      spacing="15" styleClass="settings-container">
+
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <Label text="Settings" styleClass="settings-header"/>
+
+    <TitledPane text="API Configuration" expanded="true">
+        <VBox spacing="10">
+            <Label text="Groq API Key"/>
+            <PasswordField fx:id="apiKeyField" promptText="Enter your Groq API key"/>
+            <Button text="Save API Key" onAction="#saveApiKey"/>
+        </VBox>
+    </TitledPane>
+
+    <TitledPane text="Appearance" expanded="true">
+        <VBox spacing="10">
+            <Label text="Theme"/>
+            <HBox spacing="10">
+                <RadioButton fx:id="lightThemeRadio" text="Light" toggleGroup="$themeGroup" selected="true"/>
+                <RadioButton fx:id="darkThemeRadio" text="Dark" toggleGroup="$themeGroup"/>
+            </HBox>
+            <Button text="Apply Theme" onAction="#applyTheme"/>
+        </VBox>
+    </TitledPane>
+
+    <TitledPane text="Data Management" expanded="true">
+        <VBox spacing="10">
+            <Button text="Clear Conversation History" onAction="#clearHistory"/>
+            <Button text="Export Conversation History" onAction="#exportHistory"/>
+        </VBox>
+    </TitledPane>
+
+    <TitledPane text="About" expanded="true">
+        <VBox spacing="10">
+            <Label text="IT Support Helpdesk Chatbot" styleClass="about-title"/>
+            <Label text="Version 1.0.0" styleClass="about-version"/>
+            <Label text="A JavaFX application integrated with Groq API" wrapText="true"/>
+        </VBox>
+    </TitledPane>
+
+    <fx:define>
+        <ToggleGroup fx:id="themeGroup"/>
+    </fx:define>
+</VBox>
