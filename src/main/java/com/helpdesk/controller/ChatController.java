@@ -4,6 +4,8 @@ import com.helpdesk.model.ChatMessage;
 import com.helpdesk.service.GroqService;
 import com.helpdesk.service.DatabaseService;
 import com.helpdesk.service.ResponseGenerator;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -15,9 +17,11 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.CompletableFuture;
 import java.util.prefs.Preferences;
 
@@ -36,6 +40,7 @@ public class ChatController {
     private DatabaseService databaseService;
     private ResponseGenerator responseGenerator;
     private Preferences preferences;
+    private DateTimeFormatter timeFormatter;
 
     @FXML
     public void initialize() {
@@ -44,6 +49,7 @@ public class ChatController {
         databaseService = new DatabaseService();
         responseGenerator = new ResponseGenerator(groqService, databaseService);
         preferences = Preferences.userNodeForPackage(SettingsController.class);
+        timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
 
         // Apply current theme when application starts
         Platform.runLater(() -> {
@@ -52,7 +58,7 @@ public class ChatController {
 
         // Add welcome message
         Platform.runLater(() -> {
-            addBotMessage("👋 Hi there! I'm your IT Support assistant. How can I help you today?");
+            addBotMessage("👋 Hi there! I'm your IT Support assistant. How can I help you today?", LocalDateTime.now());
 
             // Add suggestion buttons
             addSuggestionButtons();
@@ -101,16 +107,18 @@ public class ChatController {
         String message = messageInput.getText().trim();
         if (message.isEmpty()) return;
 
+        // Get current timestamp
+        LocalDateTime timestamp = LocalDateTime.now();
+
         // Add user message to chat
-        addUserMessage(message);
+        addUserMessage(message, timestamp);
 
         // Clear input
         messageInput.clear();
 
-        // Show typing indicator
-        Label typingIndicator = new Label("Typing...");
-        typingIndicator.getStyleClass().add("typing-indicator");
-        chatContainer.getChildren().add(typingIndicator);
+        // Show typing indicator with animation
+        VBox typingBox = createTypingIndicator();
+        chatContainer.getChildren().add(typingBox);
         scrollToBottom();
 
         // Get response asynchronously
@@ -124,35 +132,154 @@ public class ChatController {
         }).thenAccept(response -> {
             Platform.runLater(() -> {
                 // Remove typing indicator
-                chatContainer.getChildren().remove(typingIndicator);
+                chatContainer.getChildren().remove(typingBox);
 
-                // Add bot response
-                addBotMessage(response);
+                // Add bot response with streaming effect
+                addBotMessageWithTypingEffect(response, LocalDateTime.now());
 
                 // Save conversation to database
-                databaseService.saveConversation(message, response, LocalDateTime.now());
+                databaseService.saveConversation(message, response, timestamp);
             });
         });
     }
 
-    private void addUserMessage(String message) {
+    private VBox createTypingIndicator() {
+        VBox typingBox = new VBox();
+        typingBox.setAlignment(Pos.CENTER_LEFT);
+
+        HBox dotsBox = new HBox(3);
+        dotsBox.getStyleClass().add("typing-dots-container");
+
+        for (int i = 0; i < 3; i++) {
+            Label dot = new Label("•");
+            dot.getStyleClass().add("typing-dot");
+            dotsBox.getChildren().add(dot);
+        }
+
+        Label typingLabel = new Label();
+        typingLabel.getStyleClass().add("typing-indicator");
+        typingLabel.setGraphic(dotsBox);
+
+        VBox messageBox = new VBox();
+        messageBox.getStyleClass().add("bot-message");
+        messageBox.getStyleClass().add("typing-animation");
+        messageBox.getChildren().add(typingLabel);
+
+        typingBox.getChildren().add(messageBox);
+
+        // Create animation for typing dots
+        Timeline timeline = new Timeline(
+                new KeyFrame(Duration.seconds(0.4), e -> {
+                    ((Label)dotsBox.getChildren().get(0)).setStyle("-fx-opacity: 1;");
+                    ((Label)dotsBox.getChildren().get(1)).setStyle("-fx-opacity: 0.3;");
+                    ((Label)dotsBox.getChildren().get(2)).setStyle("-fx-opacity: 0.3;");
+                }),
+                new KeyFrame(Duration.seconds(0.8), e -> {
+                    ((Label)dotsBox.getChildren().get(0)).setStyle("-fx-opacity: 0.3;");
+                    ((Label)dotsBox.getChildren().get(1)).setStyle("-fx-opacity: 1;");
+                    ((Label)dotsBox.getChildren().get(2)).setStyle("-fx-opacity: 0.3;");
+                }),
+                new KeyFrame(Duration.seconds(1.2), e -> {
+                    ((Label)dotsBox.getChildren().get(0)).setStyle("-fx-opacity: 0.3;");
+                    ((Label)dotsBox.getChildren().get(1)).setStyle("-fx-opacity: 0.3;");
+                    ((Label)dotsBox.getChildren().get(2)).setStyle("-fx-opacity: 1;");
+                })
+        );
+        timeline.setCycleCount(Timeline.INDEFINITE);
+        timeline.play();
+
+        return typingBox;
+    }
+
+    private void addUserMessage(String message, LocalDateTime timestamp) {
+        VBox userMessageBox = new VBox(3);
+
+        // Create the timestamp label
+        Label timestampLabel = new Label(timestamp.format(timeFormatter));
+        timestampLabel.getStyleClass().add("message-timestamp");
+        timestampLabel.setAlignment(Pos.CENTER_RIGHT);
+
+        // Create the message label
         Label userMessageLabel = new Label(message);
         userMessageLabel.getStyleClass().add("user-message");
 
+        userMessageBox.getChildren().addAll(timestampLabel, userMessageLabel);
+        userMessageBox.setAlignment(Pos.CENTER_RIGHT);
+
         HBox messageContainer = new HBox();
         messageContainer.setAlignment(Pos.CENTER_RIGHT);
-        messageContainer.getChildren().add(userMessageLabel);
+        messageContainer.getChildren().add(userMessageBox);
 
         chatContainer.getChildren().add(messageContainer);
         scrollToBottom();
     }
 
-    private void addBotMessage(String message) {
+    private void addBotMessageWithTypingEffect(String fullMessage, LocalDateTime timestamp) {
         VBox botMessageBox = new VBox(5);
+
+        // Create the timestamp label
+        Label timestampLabel = new Label(timestamp.format(timeFormatter));
+        timestampLabel.getStyleClass().add("message-timestamp");
+        timestampLabel.setAlignment(Pos.CENTER_LEFT);
+
+        // Create the message label (initially empty)
+        Label botMessageLabel = new Label("");
+        botMessageLabel.getStyleClass().add("bot-message");
+        botMessageLabel.setWrapText(true);
+
+        // Add feedback buttons
+        HBox feedbackButtons = new HBox(5);
+        feedbackButtons.getStyleClass().add("feedback-buttons");
+        feedbackButtons.setVisible(false); // Hide until animation completes
+
+        Button helpfulButton = new Button("👍 Helpful");
+        helpfulButton.getStyleClass().add("feedback-button");
+        helpfulButton.setOnAction(e -> provideFeedback(fullMessage, true));
+
+        Button notHelpfulButton = new Button("👎 Not helpful");
+        notHelpfulButton.getStyleClass().add("feedback-button");
+        notHelpfulButton.setOnAction(e -> provideFeedback(fullMessage, false));
+
+        feedbackButtons.getChildren().addAll(helpfulButton, notHelpfulButton);
+
+        botMessageBox.getChildren().addAll(timestampLabel, botMessageLabel, feedbackButtons);
+
+        HBox messageContainer = new HBox();
+        messageContainer.setAlignment(Pos.CENTER_LEFT);
+        messageContainer.getChildren().add(botMessageBox);
+
+        chatContainer.getChildren().add(messageContainer);
+        scrollToBottom();
+
+        // Create typing effect
+        final int[] charIndex = {0};
+        Timeline timeline = new Timeline(
+                new KeyFrame(Duration.millis(10), event -> {
+                    if (charIndex[0] < fullMessage.length()) {
+                        botMessageLabel.setText(botMessageLabel.getText() + fullMessage.charAt(charIndex[0]));
+                        charIndex[0]++;
+                        scrollToBottom();
+                    } else {
+                        // Show feedback buttons when animation completes
+                        feedbackButtons.setVisible(true);
+                    }
+                })
+        );
+        timeline.setCycleCount(fullMessage.length());
+        timeline.play();
+    }
+
+    private void addBotMessage(String message, LocalDateTime timestamp) {
+        VBox botMessageBox = new VBox(5);
+
+        // Create the timestamp label
+        Label timestampLabel = new Label(timestamp.format(timeFormatter));
+        timestampLabel.getStyleClass().add("message-timestamp");
+        timestampLabel.setAlignment(Pos.CENTER_LEFT);
 
         Label botMessageLabel = new Label(message);
         botMessageLabel.getStyleClass().add("bot-message");
-        botMessageBox.getChildren().add(botMessageLabel);
+        botMessageBox.getChildren().addAll(timestampLabel, botMessageLabel);
 
         // Add feedback buttons
         HBox feedbackButtons = new HBox(5);
@@ -182,7 +309,7 @@ public class ChatController {
         databaseService.saveFeedback(message, helpful);
 
         if (!helpful) {
-            addBotMessage("I'm sorry this wasn't helpful. Let me try to connect you with more specific solutions.");
+            addBotMessage("I'm sorry this wasn't helpful. Let me try to connect you with more specific solutions.", LocalDateTime.now());
             // Here you could implement the escalation logic
         }
     }

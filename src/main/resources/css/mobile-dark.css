@@ -90,6 +90,14 @@
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 8, 0, 0, 2);
 }
 
+.message-timestamp {
+    -fx-text-fill: #718096;
+    -fx-font-size: 11px;
+    -fx-font-style: italic;
+    -fx-padding: 0 5px 2px 5px;
+    -fx-font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+}
+
 .user-message {
     -fx-background-color: #4299E1;
     -fx-background-radius: 18px 18px 2px 18px;
@@ -135,11 +143,28 @@
     -fx-text-fill: #F7FAFC;
 }
 
+/* Typing animation styles */
+.typing-animation {
+    -fx-min-height: 45px;
+}
+
 .typing-indicator {
     -fx-text-fill: #A0AEC0;
     -fx-font-style: italic;
-    -fx-padding: 5px 10px;
     -fx-font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+}
+
+.typing-dots-container {
+    -fx-alignment: center;
+    -fx-spacing: 3px;
+}
+
+.typing-dot {
+    -fx-text-fill: #A0AEC0;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-opacity: 0.3;
+    -fx-padding: 0;
 }
 
 .suggestion-button {
