@@ -46,7 +46,6 @@ public class GroqService {
         userMessage.put("role", "user");
         userMessage.put("content", userQuery);
 
-        // Fix: Use a List instead of Object[] directly
         List<Map<String, String>> messages = new ArrayList<>();
         messages.add(systemMessage);
         messages.add(userMessage);
@@ -79,8 +78,6 @@ public class GroqService {
 
             // Extract the AI response from the JSON
             if (jsonResponse.containsKey("choices")) {
-                // Fix: This line was causing ClassCastException
-                // Object[] choices = (Object[]) jsonResponse.get("choices");
 
                 // Correct handling of the ArrayList returned by Gson
                 List<Map<String, Object>> choices = (List<Map<String, Object>>) jsonResponse.get("choices");

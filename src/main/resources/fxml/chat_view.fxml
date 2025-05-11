@@ -3,6 +3,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.*?>
+<?import javafx.scene.text.Text?>
 
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
@@ -12,7 +13,7 @@
 
     <!-- Header -->
     <top>
-        <HBox styleClass="header">
+        <HBox styleClass="header" alignment="CENTER_LEFT">
             <Label text="IT Support Helpdesk" styleClass="header-text"/>
             <Pane HBox.hgrow="ALWAYS" />
             <Button fx:id="settingsButton" text="⚙" styleClass="icon-button" onAction="#openSettings"/>
@@ -21,10 +22,10 @@
 
     <!-- Chat area -->
     <center>
-        <ScrollPane fx:id="chatScrollPane" fitToWidth="true" styleClass="chat-area">
-            <VBox fx:id="chatContainer" spacing="10">
+        <ScrollPane fx:id="chatScrollPane" fitToWidth="true" styleClass="chat-area" vbarPolicy="ALWAYS">
+            <VBox fx:id="chatContainer" spacing="15">
                 <padding>
-                    <Insets top="10" right="10" bottom="10" left="10"/>
+                    <Insets top="15" right="15" bottom="15" left="15"/>
                 </padding>
             </VBox>
         </ScrollPane>
@@ -32,10 +33,7 @@
 
     <!-- Input area -->
     <bottom>
-        <HBox spacing="5" styleClass="input-area">
-            <padding>
-                <Insets top="10" right="10" bottom="10" left="10"/>
-            </padding>
+        <HBox spacing="10" styleClass="input-area" alignment="CENTER">
             <TextField fx:id="messageInput" promptText="Ask me anything about IT..."
                        HBox.hgrow="ALWAYS" onAction="#sendMessage"/>
             <Button text="Send" onAction="#sendMessage" styleClass="send-button"/>

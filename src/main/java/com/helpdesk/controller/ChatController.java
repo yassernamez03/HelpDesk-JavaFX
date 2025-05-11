@@ -19,6 +19,7 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
+import java.util.prefs.Preferences;
 
 public class ChatController {
 
@@ -34,6 +35,7 @@ public class ChatController {
     private GroqService groqService;
     private DatabaseService databaseService;
     private ResponseGenerator responseGenerator;
+    private Preferences preferences;
 
     @FXML
     public void initialize() {
@@ -41,6 +43,12 @@ public class ChatController {
         groqService = new GroqService();
         databaseService = new DatabaseService();
         responseGenerator = new ResponseGenerator(groqService, databaseService);
+        preferences = Preferences.userNodeForPackage(SettingsController.class);
+
+        // Apply current theme when application starts
+        Platform.runLater(() -> {
+            applyCurrentTheme();
+        });
 
         // Add welcome message
         Platform.runLater(() -> {
@@ -49,6 +57,19 @@ public class ChatController {
             // Add suggestion buttons
             addSuggestionButtons();
         });
+    }
+
+    private void applyCurrentTheme() {
+        Scene scene = chatScrollPane.getScene();
+        if (scene != null) {
+            String theme = preferences.get("theme", "light");
+            String cssPath = theme.equals("dark")
+                    ? "/css/mobile-dark.css"
+                    : "/css/mobile-light.css";
+
+            scene.getStylesheets().clear();
+            scene.getStylesheets().add(getClass().getResource(cssPath).toExternalForm());
+        }
     }
 
     private void addSuggestionButtons() {
@@ -179,7 +200,17 @@ public class ChatController {
             Stage settingsStage = new Stage();
             settingsStage.initModality(Modality.APPLICATION_MODAL);
             settingsStage.setTitle("Settings");
-            settingsStage.setScene(new Scene(root, 350, 450));
+
+            Scene scene = new Scene(root, 350, 450);
+
+            // Apply current theme to settings window when opened
+            String theme = preferences.get("theme", "light");
+            String cssPath = theme.equals("dark")
+                    ? "/css/mobile-dark.css"
+                    : "/css/mobile-light.css";
+            scene.getStylesheets().add(getClass().getResource(cssPath).toExternalForm());
+
+            settingsStage.setScene(scene);
             settingsStage.show();
         } catch (IOException e) {
             e.printStackTrace();

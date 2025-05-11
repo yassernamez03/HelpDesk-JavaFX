@@ -9,6 +9,7 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.RadioButton;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -70,37 +71,37 @@ public class SettingsController {
 
     @FXML
     public void applyTheme() {
-        Scene scene = lightThemeRadio.getScene();
         String theme = lightThemeRadio.isSelected() ? "light" : "dark";
         preferences.put("theme", theme);
 
-        // Apply theme to current scene
-        if (scene != null) {
-            scene.getStylesheets().clear();
-            if (theme.equals("dark")) {
-                scene.getStylesheets().add(getClass().getResource("/css/mobile-dark.css").toExternalForm());
-            } else {
-                scene.getStylesheets().add(getClass().getResource("/css/mobile-light.css").toExternalForm());
-            }
-        }
+        // Get the resource path for the theme
+        String cssPath = theme.equals("dark")
+                ? "/css/mobile-dark.css"
+                : "/css/mobile-light.css";
+        String cssResource = getClass().getResource(cssPath).toExternalForm();
 
-        // Apply theme to parent window (chat view)
-        Stage stage = (Stage) lightThemeRadio.getScene().getWindow();
-        Stage parentStage = (Stage) stage.getOwner();
-        if (parentStage != null) {
-            Scene parentScene = parentStage.getScene();
-            if (parentScene != null) {
-                parentScene.getStylesheets().clear();
-                if (theme.equals("dark")) {
-                    parentScene.getStylesheets().add(getClass().getResource("/css/mobile-dark.css").toExternalForm());
-                } else {
-                    parentScene.getStylesheets().add(getClass().getResource("/css/mobile-light.css").toExternalForm());
+        // Apply theme to settings window
+        applyThemeToScene(lightThemeRadio.getScene(), cssResource);
+
+        // Apply theme to all open application windows
+        for (Window window : Stage.getWindows()) {
+            if (window instanceof Stage) {
+                Scene scene = ((Stage) window).getScene();
+                if (scene != null) {
+                    applyThemeToScene(scene, cssResource);
                 }
             }
         }
 
         showAlert(Alert.AlertType.INFORMATION, "Theme Applied",
-                "The " + theme + " theme has been applied.");
+                "The " + theme + " theme has been applied to all windows.");
+    }
+
+    private void applyThemeToScene(Scene scene, String cssResource) {
+        if (scene == null) return;
+
+        scene.getStylesheets().clear();
+        scene.getStylesheets().add(cssResource);
     }
 
     @FXML
