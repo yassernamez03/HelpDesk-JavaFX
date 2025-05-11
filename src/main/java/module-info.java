@@ -19,7 +19,11 @@ module com.helpdesk {
     requires com.google.gson;
     requires okhttp3;
     requires org.xerial.sqlitejdbc;
-
+    requires flexmark;
+    requires flexmark.util.ast;
+    requires flexmark.util.data;
+    requires flexmark.util.misc;
+    
     opens com.helpdesk to javafx.fxml;
     exports com.helpdesk;
     exports com.helpdesk.controller;

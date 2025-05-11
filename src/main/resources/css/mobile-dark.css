@@ -302,3 +302,33 @@
     -fx-text-fill: #A0AEC0;
     -fx-font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
 }
+
+
+.markdown-container {
+    -fx-color:white;
+    -fx-spacing: 8px;
+    -fx-fill-width: true;
+}
+
+.markdown-text {
+    -fx-fill: #F7FAFC;  /* Light text for dark theme */
+}
+
+.code-text {
+    -fx-font-family: "Consolas", "Monaco", "Courier New", monospace;
+    -fx-fill: #476582;
+    -fx-background-color: #F0F2F5;
+    -fx-background-radius: 4px;
+    -fx-padding: 2px 4px;
+}
+
+.hyperlink {
+    -fx-text-fill: #3182CE;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.hyperlink:hover {
+    -fx-text-fill: #2B6CB0;
+    -fx-underline: true;
+}

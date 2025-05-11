@@ -10,6 +10,7 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -222,10 +223,12 @@ public class ChatController {
         timestampLabel.getStyleClass().add("message-timestamp");
         timestampLabel.setAlignment(Pos.CENTER_LEFT);
 
-        // Create the message label (initially empty)
-        Label botMessageLabel = new Label("");
-        botMessageLabel.getStyleClass().add("bot-message");
-        botMessageLabel.setWrapText(true);
+        // Create the message container (initially empty)
+        VBox messageContentBox = new VBox();
+        messageContentBox.getStyleClass().add("bot-message");
+
+        // We'll add content to this incrementally
+        StringBuilder currentText = new StringBuilder();
 
         // Add feedback buttons
         HBox feedbackButtons = new HBox(5);
@@ -242,7 +245,7 @@ public class ChatController {
 
         feedbackButtons.getChildren().addAll(helpfulButton, notHelpfulButton);
 
-        botMessageBox.getChildren().addAll(timestampLabel, botMessageLabel, feedbackButtons);
+        botMessageBox.getChildren().addAll(timestampLabel, messageContentBox, feedbackButtons);
 
         HBox messageContainer = new HBox();
         messageContainer.setAlignment(Pos.CENTER_LEFT);
@@ -256,8 +259,15 @@ public class ChatController {
         Timeline timeline = new Timeline(
                 new KeyFrame(Duration.millis(10), event -> {
                     if (charIndex[0] < fullMessage.length()) {
-                        botMessageLabel.setText(botMessageLabel.getText() + fullMessage.charAt(charIndex[0]));
+                        currentText.append(fullMessage.charAt(charIndex[0]));
                         charIndex[0]++;
+
+                        // Update the node with the current text, properly rendered as markdown
+                        messageContentBox.getChildren().clear();
+                        messageContentBox.getChildren().add(
+                                com.helpdesk.util.MarkdownRenderer.renderMarkdown(currentText.toString())
+                        );
+
                         scrollToBottom();
                     } else {
                         // Show feedback buttons when animation completes
@@ -277,9 +287,12 @@ public class ChatController {
         timestampLabel.getStyleClass().add("message-timestamp");
         timestampLabel.setAlignment(Pos.CENTER_LEFT);
 
-        Label botMessageLabel = new Label(message);
-        botMessageLabel.getStyleClass().add("bot-message");
-        botMessageBox.getChildren().addAll(timestampLabel, botMessageLabel);
+        // Use our markdown renderer instead of a simple Label
+        Node messageNode = com.helpdesk.util.MarkdownRenderer.renderMarkdown(message);
+        VBox messageContentBox = new VBox(messageNode);
+        messageContentBox.getStyleClass().add("bot-message");
+
+        botMessageBox.getChildren().addAll(timestampLabel, messageContentBox);
 
         // Add feedback buttons
         HBox feedbackButtons = new HBox(5);
