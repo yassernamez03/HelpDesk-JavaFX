@@ -3,7 +3,6 @@ package com.helpdesk.util;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Hyperlink;
-import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
@@ -19,40 +18,23 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Simple utility class to render basic Markdown formatting in JavaFX
+ * Enhanced Markdown renderer for basic formatting in JavaFX.
+ * Supports bold, italic, code, links, and bullet points.
  */
 public class MarkdownRenderer {
 
-    // Pattern for bold text: **text** or __text__
     private static final Pattern PATTERN_BOLD = Pattern.compile("(\\*\\*|__)(.+?)(\\*\\*|__)");
-
-    // Pattern for italic text: *text* or _text_
-    private static final Pattern PATTERN_ITALIC = Pattern.compile("(\\*|_)(.+?)(\\*|_)");
-
-    // Pattern for links: [text](url)
+    private static final Pattern PATTERN_ITALIC = Pattern.compile("(?<!\\*)\\*(?!\\*)(.+?)(?<!\\*)\\*(?!\\*)|_(.+?)_");
     private static final Pattern PATTERN_LINK = Pattern.compile("\\[(.+?)\\]\\((.+?)\\)");
-
-    // Pattern for bullet points: * item or - item
     private static final Pattern PATTERN_BULLET = Pattern.compile("^(\\s*)(\\*|-)\\s+(.+)$", Pattern.MULTILINE);
-
-    // Pattern for code blocks: `code`
     private static final Pattern PATTERN_CODE = Pattern.compile("`([^`]+?)`");
 
-    /**
-     * Renders a markdown string to a styled JavaFX node
-     *
-     * @param markdown The markdown text to render
-     * @return A Node containing the styled text
-     */
     public static Node renderMarkdown(String markdown) {
         VBox container = new VBox(5);
         container.getStyleClass().add("markdown-container");
 
-        // Split by double newlines to handle paragraphs
-        String[] paragraphs = markdown.split("\n\n+");
-
+        String[] paragraphs = markdown.split("\\n\\n+");
         for (String paragraph : paragraphs) {
-            // Handle bullet lists
             if (paragraph.trim().matches("(?s)^(\\s*)(\\*|-)\\s+.*")) {
                 VBox listContainer = new VBox(3);
                 listContainer.setPadding(new Insets(0, 0, 0, 20));
@@ -60,23 +42,17 @@ public class MarkdownRenderer {
                 Matcher bulletMatcher = PATTERN_BULLET.matcher(paragraph);
                 while (bulletMatcher.find()) {
                     String bulletText = bulletMatcher.group(3);
-                    TextFlow bulletPoint = new TextFlow();
-
-                    Text bullet = new Text("• ");
-                    bulletPoint.getChildren().add(bullet);
-
-                    // Process formatting inside bullet point
-                    parseAndAddFormattedText(bulletText, bulletPoint);
-
-                    listContainer.getChildren().add(bulletPoint);
+                    TextFlow bulletFlow = new TextFlow();
+                    bulletFlow.getChildren().add(new Text("• "));
+                    parseAndAddFormattedText(bulletText, bulletFlow);
+                    listContainer.getChildren().add(bulletFlow);
                 }
 
                 container.getChildren().add(listContainer);
             } else {
-                // Normal paragraph
-                TextFlow textFlow = new TextFlow();
-                parseAndAddFormattedText(paragraph, textFlow);
-                container.getChildren().add(textFlow);
+                TextFlow paragraphFlow = new TextFlow();
+                parseAndAddFormattedText(paragraph, paragraphFlow);
+                container.getChildren().add(paragraphFlow);
             }
         }
 
@@ -87,22 +63,13 @@ public class MarkdownRenderer {
         List<TextSegment> segments = new ArrayList<>();
         segments.add(new TextSegment(0, text.length(), text, TextType.PLAIN));
 
-        // Process bold
         applyPatternToSegments(segments, PATTERN_BOLD, TextType.BOLD);
-
-        // Process italic
         applyPatternToSegments(segments, PATTERN_ITALIC, TextType.ITALIC);
-
-        // Process code
         applyPatternToSegments(segments, PATTERN_CODE, TextType.CODE);
-
-        // Process links
         applyPatternToSegments(segments, PATTERN_LINK, TextType.LINK);
 
-        // Sort segments by start position
         segments.sort((a, b) -> Integer.compare(a.start, b.start));
 
-        // Create nodes for each segment
         for (TextSegment segment : segments) {
             if (segment.type != TextType.REMOVED) {
                 Node node = createNodeForSegment(segment);
@@ -124,51 +91,81 @@ public class MarkdownRenderer {
 
             String text = segment.text;
             Matcher matcher = pattern.matcher(text);
-
             int lastEnd = 0;
-            boolean found = false;
 
             while (matcher.find()) {
-                found = true;
-                int fullStart = matcher.start();
-                int fullEnd = matcher.end();
+                int matchStart = matcher.start();
+                int matchEnd = matcher.end();
 
-                if (fullStart > lastEnd) {
+                if (matchStart > lastEnd) {
                     newSegments.add(new TextSegment(
                             segment.start + lastEnd,
-                            segment.start + fullStart,
-                            text.substring(lastEnd, fullStart),
+                            segment.start + matchStart,
+                            text.substring(lastEnd, matchStart),
                             TextType.PLAIN
                     ));
                 }
 
-                if (type == TextType.LINK) {
-                    String linkText = matcher.group(1);
-                    String url = matcher.group(2);
+                try {
+                    switch (type) {
+                        case LINK:
+                            if (matcher.groupCount() >= 2) {
+                                String linkText = matcher.group(1);
+                                String url = matcher.group(2);
+                                newSegments.add(new TextSegment(
+                                        segment.start + matchStart,
+                                        segment.start + matchEnd,
+                                        linkText,
+                                        TextType.LINK,
+                                        url
+                                ));
+                            }
+                            break;
+                        case CODE:
+                            if (matcher.groupCount() >= 1) {
+                                String code = matcher.group(1);
+                                newSegments.add(new TextSegment(
+                                        segment.start + matchStart,
+                                        segment.start + matchEnd,
+                                        code,
+                                        TextType.CODE
+                                ));
+                            }
+                            break;
+                        case BOLD:
+                        case ITALIC:
+                            if (matcher.groupCount() >= 2) {
+                                String content = matcher.group(2) != null ? matcher.group(2) : matcher.group(1);
+                                newSegments.add(new TextSegment(
+                                        segment.start + matchStart,
+                                        segment.start + matchEnd,
+                                        content,
+                                        type
+                                ));
+                            }
+                            break;
+                        default:
+                            newSegments.add(new TextSegment(
+                                    segment.start + matchStart,
+                                    segment.start + matchEnd,
+                                    matcher.group(),
+                                    TextType.PLAIN
+                            ));
+                    }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
                     newSegments.add(new TextSegment(
-                            segment.start + fullStart,
-                            segment.start + fullEnd,
-                            linkText,
-                            TextType.LINK,
-                            url
-                    ));
-                } else {
-                    // For BOLD, ITALIC, CODE
-                    String content = matcher.group(2);
-                    newSegments.add(new TextSegment(
-                            segment.start + fullStart,
-                            segment.start + fullEnd,
-                            content,
-                            type
+                            segment.start + matchStart,
+                            segment.start + matchEnd,
+                            matcher.group(),
+                            TextType.PLAIN
                     ));
                 }
 
-                lastEnd = fullEnd;
+                lastEnd = matchEnd;
             }
 
-            if (!found) {
-                newSegments.add(segment);
-            } else if (lastEnd < text.length()) {
+            if (lastEnd < text.length()) {
                 newSegments.add(new TextSegment(
                         segment.start + lastEnd,
                         segment.start + text.length(),
@@ -185,21 +182,21 @@ public class MarkdownRenderer {
     private static Node createNodeForSegment(TextSegment segment) {
         switch (segment.type) {
             case BOLD:
-                Text boldText = new Text(segment.text);
-                boldText.setFont(Font.font(null, FontWeight.BOLD, -1));
-                boldText.getStyleClass().add("markdown-text");
-                return boldText;
+                Text bold = new Text(segment.text);
+                bold.setFont(Font.font(null, FontWeight.BOLD, -1));
+                bold.getStyleClass().add("markdown-text");
+                return bold;
 
             case ITALIC:
-                Text italicText = new Text(segment.text);
-                italicText.setFont(Font.font(null, FontPosture.ITALIC, -1));
-                italicText.getStyleClass().add("markdown-text");
-                return italicText;
+                Text italic = new Text(segment.text);
+                italic.setFont(Font.font(null, FontPosture.ITALIC, -1));
+                italic.getStyleClass().add("markdown-text");
+                return italic;
 
             case CODE:
-                Text codeText = new Text(segment.text);
-                codeText.getStyleClass().add("code-text");
-                return codeText;
+                Text code = new Text(segment.text);
+                code.getStyleClass().add("code-text");
+                return code;
 
             case LINK:
                 Hyperlink link = new Hyperlink(segment.text);
@@ -213,9 +210,9 @@ public class MarkdownRenderer {
                 return link;
 
             case PLAIN:
-                Text plainText = new Text(segment.text);
-                plainText.getStyleClass().add("markdown-text");
-                return plainText;
+                Text plain = new Text(segment.text);
+                plain.getStyleClass().add("markdown-text");
+                return plain;
 
             default:
                 return null;
