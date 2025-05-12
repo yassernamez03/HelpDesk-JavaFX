@@ -316,19 +316,40 @@
 
 .code-text {
     -fx-font-family: "Consolas", "Monaco", "Courier New", monospace;
-    -fx-fill: #476582;
-    -fx-background-color: #F0F2F5;
+    -fx-fill: #4FD1C5;  /* Vibrant teal for text */
+    -fx-background-color: #1A202C;  /* Dark background */
     -fx-background-radius: 4px;
     -fx-padding: 2px 4px;
 }
 
+.code-block {
+    -fx-background-color: #2D3748;  /* Deeper dark background */
+    -fx-background-radius: 6px;
+    -fx-padding: 10px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.5), 5, 0, 0, 2);
+    -fx-min-width: 240px;
+}
+
+.code-block-text {
+    -fx-font-family: "Consolas", "Monaco", "Courier New", monospace;
+    -fx-fill: #63B3ED;  /* Bright blue for code */
+    -fx-font-size: 13px;
+}
+
+.code-language {
+    -fx-font-family: "Consolas", "Monaco", "Courier New", monospace;
+    -fx-fill: #ED64A6;  /* Vibrant pink for language */
+    -fx-font-size: 11px;
+    -fx-font-style: italic;
+}
+
 .hyperlink {
-    -fx-text-fill: #3182CE;
+    -fx-text-fill: #4299E1;  /* Bright blue for links */
     -fx-border-color: transparent;
     -fx-padding: 0;
 }
 
 .hyperlink:hover {
-    -fx-text-fill: #2B6CB0;
+    -fx-text-fill: #63B3ED;  /* Lighter blue on hover */
     -fx-underline: true;
 }

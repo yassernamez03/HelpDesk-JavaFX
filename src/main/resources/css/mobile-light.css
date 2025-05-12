@@ -310,15 +310,33 @@
 }
 
 .markdown-text {
-    -fx-fill: #2D3748;  /* Dark text for light theme */
+    -fx-fill: #4d525e;  /* Dark text for light theme */
 }
 
 .code-text {
     -fx-font-family: "Consolas", "Monaco", "Courier New", monospace;
-    -fx-fill: #476582;
+    -fx-fill: #61a1dd;
     -fx-background-color: #F0F2F5;
     -fx-background-radius: 4px;
     -fx-padding: 2px 4px;
+}
+.code-block {
+    -fx-background-color: #2D3748;  /* Dark background for code blocks */
+    -fx-background-radius: 6px;
+    -fx-padding: 10px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 5, 0, 0, 2);
+    -fx-min-width: 240px;
+}
+.code-block-text {
+    -fx-font-family: "Consolas", "Monaco", "Courier New", monospace;
+    -fx-fill: #81E6D9;  /* Light teal for code */
+    -fx-font-size: 13px;
+}
+.code-language {
+    -fx-font-family: "Consolas", "Monaco", "Courier New", monospace;
+    -fx-fill: #006eff;  /* Muted color for language */
+    -fx-font-size: 11px;
+    -fx-font-style: italic;
 }
 
 .hyperlink {
