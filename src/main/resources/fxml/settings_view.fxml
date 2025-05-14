@@ -27,22 +27,11 @@
                     <Insets top="10" right="25" bottom="25" left="25"/>
                 </padding>
 
-                <TitledPane text="API Configuration" expanded="true">
-                    <VBox spacing="15">
-                        <Label text="Groq API Key"/>
-                        <PasswordField fx:id="apiKeyField" promptText="Enter your Groq API key"/>
-                        <Button text="Save API Key" onAction="#saveApiKey" styleClass="button,primary"/>
-                    </VBox>
-                </TitledPane>
-
                 <TitledPane text="Appearance" expanded="true">
-                    <VBox spacing="15">
-                        <Label text="Theme"/>
+                    <VBox spacing="10">
                         <HBox spacing="20">
-                            <RadioButton fx:id="lightThemeRadio" text="Light" toggleGroup="$themeGroup" selected="true"/>
-                            <RadioButton fx:id="darkThemeRadio" text="Dark" toggleGroup="$themeGroup"/>
+                            <ToggleButton fx:id="themeToggle" text="Dark Mode" onAction="#toggleTheme" />
                         </HBox>
-                        <Button text="Apply Theme" onAction="#applyTheme"/>
                     </VBox>
                 </TitledPane>
 

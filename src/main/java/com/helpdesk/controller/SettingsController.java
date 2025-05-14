@@ -6,7 +6,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.PasswordField;
-import javafx.scene.control.RadioButton;
+import javafx.scene.control.ToggleButton;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -20,14 +20,9 @@ import java.util.prefs.Preferences;
 
 public class SettingsController {
 
-    @FXML
-    private PasswordField apiKeyField;
 
     @FXML
-    private RadioButton lightThemeRadio;
-
-    @FXML
-    private RadioButton darkThemeRadio;
+    private ToggleButton themeToggle;
 
     private GroqService groqService;
     private DatabaseService databaseService;
@@ -39,51 +34,28 @@ public class SettingsController {
         databaseService = new DatabaseService();
         preferences = Preferences.userNodeForPackage(SettingsController.class);
 
-        // Load saved API key
         String savedApiKey = preferences.get("groqApiKey", "");
-        if (!savedApiKey.isEmpty()) {
-            apiKeyField.setText(savedApiKey);
-        }
 
-        // Load theme preference
+        // Set toggle state based on saved preference
         String theme = preferences.get("theme", "light");
-        if (theme.equals("dark")) {
-            darkThemeRadio.setSelected(true);
-        } else {
-            lightThemeRadio.setSelected(true);
-        }
+        boolean isDark = theme.equals("dark");
+        themeToggle.setSelected(isDark);
+        themeToggle.setText(isDark ? "Dark Mode" : "Light Mode");
     }
 
     @FXML
-    public void saveApiKey() {
-        String apiKey = apiKeyField.getText().trim();
-        if (!apiKey.isEmpty()) {
-            preferences.put("groqApiKey", apiKey);
-            groqService.setApiKey(apiKey);
-
-            showAlert(Alert.AlertType.INFORMATION, "API Key Saved",
-                    "Your Groq API key has been saved successfully.");
-        } else {
-            showAlert(Alert.AlertType.WARNING, "Empty API Key",
-                    "Please enter a valid API key.");
-        }
-    }
-
-    @FXML
-    public void applyTheme() {
-        String theme = lightThemeRadio.isSelected() ? "light" : "dark";
+    public void toggleTheme() {
+        boolean isDark = themeToggle.isSelected();
+        String theme = isDark ? "dark" : "light";
         preferences.put("theme", theme);
 
-        // Get the resource path for the theme
-        String cssPath = theme.equals("dark")
+        themeToggle.setText(isDark ? "Dark Mode" : "Light Mode");
+
+        String cssPath = isDark
                 ? "/css/mobile-dark.css"
                 : "/css/mobile-light.css";
         String cssResource = getClass().getResource(cssPath).toExternalForm();
 
-        // Apply theme to settings window
-        applyThemeToScene(lightThemeRadio.getScene(), cssResource);
-
-        // Apply theme to all open application windows
         for (Window window : Stage.getWindows()) {
             if (window instanceof Stage) {
                 Scene scene = ((Stage) window).getScene();
@@ -96,6 +68,7 @@ public class SettingsController {
         showAlert(Alert.AlertType.INFORMATION, "Theme Applied",
                 "The " + theme + " theme has been applied to all windows.");
     }
+
 
     private void applyThemeToScene(Scene scene, String cssResource) {
         if (scene == null) return;
@@ -136,26 +109,7 @@ public class SettingsController {
                 new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
         fileChooser.setInitialFileName("helpdesk_history.csv");
 
-        File file = fileChooser.showSaveDialog(apiKeyField.getScene().getWindow());
 
-        if (file != null) {
-            try (FileWriter writer = new FileWriter(file)) {
-                // Write CSV header
-                writer.write("User Message,Bot Response,Timestamp,Helpful\n");
-
-                // Export data from database to CSV
-                // Note: This is a simplified example. In a real app, you would
-                // query the database and format each row properly
-                writer.write("Example user message,Example bot response,2025-05-10T12:00:00,true\n");
-
-                showAlert(Alert.AlertType.INFORMATION, "Export Successful",
-                        "Conversation history has been exported to: " + file.getPath());
-            } catch (IOException e) {
-                e.printStackTrace();
-                showAlert(Alert.AlertType.ERROR, "Export Failed",
-                        "Failed to export conversation history: " + e.getMessage());
-            }
-        }
     }
 
     private void showAlert(Alert.AlertType type, String title, String content) {

@@ -20,7 +20,7 @@ public class GroqService {
         this.client = new OkHttpClient();
         this.gson = new Gson();
         // Load API key from environment or config
-        this.apiKey = "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";
+        this.apiKey = "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";
     }
 
     public void setApiKey(String apiKey) {

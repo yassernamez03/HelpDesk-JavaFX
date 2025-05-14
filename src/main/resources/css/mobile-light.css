@@ -257,6 +257,18 @@
 .radio-button:selected .radio .dot {
     -fx-background-color: #4299E1;
 }
+.toggle-button {
+    -fx-background-color: #E2E8F0;
+    -fx-text-fill: #2D3748;
+    -fx-background-radius: 20;
+    -fx-padding: 6px 12px;
+    -fx-cursor: hand;
+}
+
+.toggle-button:selected {
+    -fx-background-color: #4299E1;
+    -fx-text-fill: white;
+}
 
 .button {
     -fx-background-color: #E2E8F0;

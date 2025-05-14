@@ -103,7 +103,8 @@
     -fx-background-radius: 18px 18px 2px 18px;
     -fx-padding: 12px 16px;
     -fx-text-fill: white;
-    -fx-max-width: 280px;
+    -fx-max-width: 70%;
+    -fx-line-spacing: 5px;
     -fx-wrap-text: true;
     -fx-alignment: center-right;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 1);
@@ -116,7 +117,7 @@
     -fx-background-radius: 18px 18px 18px 2px;
     -fx-padding: 12px 16px;
     -fx-text-fill: #F7FAFC;
-    -fx-max-width: 280px;
+    -fx-max-width: 70%;
     -fx-wrap-text: true;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 1);
     -fx-font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
@@ -255,6 +256,30 @@
 
 .radio-button:selected .radio .dot {
     -fx-background-color: #4299E1;
+}
+/* ToggleButton for theme switch (Dark Mode) */
+.toggle-button {
+    -fx-background-color: #2D3748;
+    -fx-text-fill: #F7FAFC;
+    -fx-background-radius: 20px;
+    -fx-padding: 6px 14px;
+    -fx-cursor: hand;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 4, 0, 0, 1);
+    -fx-border-color: #4A5568;
+    -fx-border-width: 1px;
+}
+
+.toggle-button:selected {
+    -fx-background-color: #4299E1;
+    -fx-text-fill: white;
+    -fx-border-color: transparent;
+}
+
+.toggle-button:hover {
+    -fx-background-color: #4A5568;
 }
 
 .button {

@@ -4,11 +4,12 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.text.Text?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.helpdesk.controller.ChatController"
-            prefHeight="650.0" prefWidth="380.0"
+            prefHeight="800.0" prefWidth="650.0"
             styleClass="mobile-container">
 
     <!-- Header -->
@@ -16,7 +17,14 @@
         <HBox styleClass="header" alignment="CENTER_LEFT">
             <Label text="IT Support Helpdesk" styleClass="header-text"/>
             <Pane HBox.hgrow="ALWAYS" />
-            <Button fx:id="settingsButton" text="⚙" styleClass="icon-button" onAction="#openSettings"/>
+            <Button fx:id="settingsButton" onAction="#openSettings" styleClass="icon-button">
+                <graphic>
+                    <FontIcon iconLiteral="fa-cog" iconSize="18" iconColor="white"/>
+                </graphic>
+                <tooltip>
+                    <Tooltip text="Settings" />
+                </tooltip>
+            </Button>
         </HBox>
     </top>
 

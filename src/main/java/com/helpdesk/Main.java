@@ -17,7 +17,7 @@ public class Main extends Application {
         primaryStage.setMinHeight(650);
         primaryStage.setTitle("IT Support Helpdesk");
 
-        Scene scene = new Scene(root, 380, 650);
+        Scene scene = new Scene(root, 800, 650);
         scene.getStylesheets().add(getClass().getResource("/css/mobile-light.css").toExternalForm());
 
         primaryStage.setScene(scene);

@@ -26,7 +26,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.concurrent.CompletableFuture;
 import java.util.prefs.Preferences;
 
-public class ChatController {
+public class  ChatController {
 
     @FXML
     private ScrollPane chatScrollPane;
@@ -85,7 +85,6 @@ public class ChatController {
 
         String[] suggestions = {
                 "WiFi not working",
-                "Reset password",
                 "Printer issues",
                 "Software installation"
         };
@@ -203,7 +202,10 @@ public class ChatController {
         // Create the message label
         Label userMessageLabel = new Label(message);
         userMessageLabel.getStyleClass().add("user-message");
+        userMessageLabel.setWrapText(true); // Ensure wrapping if needed
 
+        // Add this to limit width
+        userMessageLabel.setMaxWidth(chatScrollPane.getWidth() * 0.75);
         userMessageBox.getChildren().addAll(timestampLabel, userMessageLabel);
         userMessageBox.setAlignment(Pos.CENTER_RIGHT);
 
@@ -226,6 +228,8 @@ public class ChatController {
         // Create the message container (initially empty)
         VBox messageContentBox = new VBox();
         messageContentBox.getStyleClass().add("bot-message");
+
+        messageContentBox.setMaxWidth(chatScrollPane.getWidth() * 0.75);
 
         // We'll add content to this incrementally
         StringBuilder currentText = new StringBuilder();
@@ -341,7 +345,7 @@ public class ChatController {
             settingsStage.initModality(Modality.APPLICATION_MODAL);
             settingsStage.setTitle("Settings");
 
-            Scene scene = new Scene(root, 350, 450);
+            Scene scene = new Scene(root, 650, 450);
 
             // Apply current theme to settings window when opened
             String theme = preferences.get("theme", "light");
