@@ -12,40 +12,75 @@
             prefHeight="800.0" prefWidth="650.0"
             styleClass="mobile-container">
 
-    <!-- Header -->
-    <top>
-        <HBox styleClass="header" alignment="CENTER_LEFT">
-            <Label text="IT Support Helpdesk" styleClass="header-text"/>
-            <Pane HBox.hgrow="ALWAYS" />
-            <Button fx:id="settingsButton" onAction="#openSettings" styleClass="icon-button">
+    <!-- Navigation Bar -->
+    <left>
+        <VBox styleClass="nav-bar">
+            <Button styleClass="nav-button, nav-button-active">
                 <graphic>
-                    <FontIcon iconLiteral="fa-cog" iconSize="18" iconColor="white"/>
+                    <FontIcon iconLiteral="fa-comments" iconSize="20"/>
+                </graphic>
+                <tooltip>
+                    <Tooltip text="Chat" />
+                </tooltip>
+            </Button>
+            <Button styleClass="nav-button">
+                <graphic>
+                    <FontIcon iconLiteral="fa-book" iconSize="20"/>
+                </graphic>
+                <tooltip>
+                    <Tooltip text="Knowledge Base" />
+                </tooltip>
+            </Button>
+            <Button styleClass="nav-button">
+                <graphic>
+                    <FontIcon iconLiteral="fa-history" iconSize="20"/>
+                </graphic>
+                <tooltip>
+                    <Tooltip text="History" />
+                </tooltip>
+            </Button>
+            <Pane VBox.vgrow="ALWAYS" />
+            <Button fx:id="settingsButton" onAction="#openSettings" styleClass="nav-button">
+                <graphic>
+                    <FontIcon iconLiteral="fa-cog" iconSize="20"/>
                 </graphic>
                 <tooltip>
                     <Tooltip text="Settings" />
                 </tooltip>
             </Button>
-        </HBox>
-    </top>
+        </VBox>
+    </left>
 
-    <!-- Chat area -->
     <center>
-        <ScrollPane fx:id="chatScrollPane" fitToWidth="true" styleClass="chat-area" vbarPolicy="ALWAYS">
-            <VBox fx:id="chatContainer" spacing="15">
-                <padding>
-                    <Insets top="15" right="15" bottom="15" left="15"/>
-                </padding>
-            </VBox>
-        </ScrollPane>
-    </center>
+        <BorderPane>
+            <!-- Header -->
+            <top>
+                <HBox styleClass="header" alignment="CENTER_LEFT">
+                    <Label text="IT Support Helpdesk" styleClass="header-text"/>
+                    <Pane HBox.hgrow="ALWAYS" />
+                </HBox>
+            </top>
 
-    <!-- Input area -->
-    <bottom>
-        <HBox spacing="10" styleClass="input-area" alignment="CENTER">
-            <TextField fx:id="messageInput" promptText="Ask me anything about IT..."
-                       HBox.hgrow="ALWAYS" onAction="#sendMessage"/>
-            <Button text="Send" onAction="#sendMessage" styleClass="send-button"/>
-        </HBox>
-    </bottom>
+            <!-- Chat area -->
+            <center>
+                <ScrollPane fx:id="chatScrollPane" fitToWidth="true" styleClass="chat-area" vbarPolicy="ALWAYS">
+                    <VBox fx:id="chatContainer" spacing="15">
+                        <padding>
+                            <Insets top="15" right="15" bottom="15" left="15"/>
+                        </padding>
+                    </VBox>
+                </ScrollPane>
+            </center>
+
+            <!-- Input area -->
+            <bottom>
+                <HBox spacing="10" styleClass="input-area" alignment="CENTER">
+                    <TextField fx:id="messageInput" promptText="Ask me anything about IT..."
+                            HBox.hgrow="ALWAYS" onAction="#sendMessage"/>
+                    <Button text="Send" onAction="#sendMessage" styleClass="send-button"/>
+                </HBox>
+            </bottom>
+        </BorderPane>
+    </center>
 
 </BorderPane>

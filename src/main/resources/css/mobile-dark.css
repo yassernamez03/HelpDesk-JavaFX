@@ -1,6 +1,7 @@
 /* mobile-dark.css - Modern Dark Theme */
 .mobile-container {
     -fx-background-color: #171923;
+    background-color: #171923;
 }
 
 .header {
@@ -38,8 +39,10 @@
 
 .chat-area {
     -fx-background-color: #171923;
+    background-color: #171923;
     -fx-background: #171923;
-    -fx-padding: 10px;
+    -fx-padding: 0;
+    padding: 0;
 }
 
 .chat-area .viewport {
@@ -377,4 +380,67 @@
 .hyperlink:hover {
     -fx-text-fill: #63B3ED;  /* Lighter blue on hover */
     -fx-underline: true;
+}
+
+/* Navigation Bar Styles */
+.nav-bar {
+    -fx-background-color: #1A202C;
+    background-color: #1A202C;
+    -fx-padding: 10px;
+    padding: 10px;
+    -fx-spacing: 8px;
+    -fx-min-width: 60px;
+    min-width: 60px;
+    -fx-pref-width: 60px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 10, 0, 2, 0);
+}
+
+.nav-button {
+    -fx-background-color: transparent;
+    background-color: transparent;
+    -fx-background-radius: 8px;
+    -fx-padding: 12px;
+    padding: 12px;
+    -fx-min-width: 40px;
+    min-width: 40px;
+    -fx-min-height: 40px;
+    min-height: 40px;
+    -fx-max-width: 40px;
+    max-width: 40px;
+    -fx-max-height: 40px;
+    max-height: 40px;
+    -fx-alignment: center;
+    -fx-cursor: hand;
+    cursor: pointer;
+}
+
+.nav-button:hover {
+    -fx-background-color: rgba(160, 174, 192, 0.2);
+    background-color: rgba(160, 174, 192, 0.2);
+}
+
+.nav-button:pressed {
+    -fx-background-color: rgba(160, 174, 192, 0.3);
+    background-color: rgba(160, 174, 192, 0.3);
+}
+
+.nav-button .ikonli-font-icon {
+    -fx-icon-color: #A0AEC0;
+}
+
+.nav-button:hover .ikonli-font-icon {
+    -fx-icon-color: #F7FAFC;
+}
+
+.nav-button-active {
+    -fx-background-color: rgba(66, 153, 225, 0.2);
+    background-color: rgba(66, 153, 225, 0.2);
+}
+
+.nav-button-active .ikonli-font-icon {
+    -fx-icon-color: #4299E1;
+}
+
+.nav-button-active:hover .ikonli-font-icon {
+    -fx-icon-color: #63B3ED;
 }
