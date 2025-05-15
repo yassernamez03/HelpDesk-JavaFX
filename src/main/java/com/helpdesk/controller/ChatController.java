@@ -32,7 +32,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
-public class ChatController {    @FXML
+public class ChatController {    
+    @FXML
     private ScrollPane chatScrollPane;
 
     @FXML
@@ -58,6 +59,18 @@ public class ChatController {    @FXML
 
     @FXML
     private TextField searchField;
+
+    @FXML
+    private Button chatButton;
+
+    @FXML
+    private Button knowledgeBaseButton;
+
+    @FXML
+    private Button historyButton;
+
+    @FXML
+    private Button settingsButton;
 
     private GroqService groqService;
     private DatabaseService databaseService;
@@ -388,11 +401,22 @@ public class ChatController {    @FXML
         }
     }
 
+    private void updateNavigationState(Button activeButton) {
+        // Remove active state from all buttons
+        chatButton.getStyleClass().remove("nav-button-active");
+        knowledgeBaseButton.getStyleClass().remove("nav-button-active");
+        historyButton.getStyleClass().remove("nav-button-active");
+        
+        // Add active state to the current button
+        activeButton.getStyleClass().add("nav-button-active");
+    }
+
     @FXML
     public void showKnowledgeBaseView() {
         chatView.setVisible(false);
         knowledgeBaseView.setVisible(true);
         historyView.setVisible(false);
+        updateNavigationState(knowledgeBaseButton);
         loadKnowledgeBase("");
     }
 
@@ -401,6 +425,7 @@ public class ChatController {    @FXML
         chatView.setVisible(true);
         knowledgeBaseView.setVisible(false);
         historyView.setVisible(false);
+        updateNavigationState(chatButton);
     }
 
     @FXML
@@ -408,6 +433,7 @@ public class ChatController {    @FXML
         chatView.setVisible(false);
         knowledgeBaseView.setVisible(false);
         historyView.setVisible(true);
+        updateNavigationState(historyButton);
         loadChatHistory();
     }
 
