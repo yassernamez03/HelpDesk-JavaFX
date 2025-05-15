@@ -54,8 +54,8 @@ public class DatabaseService {
             ResultSet resultSet = statement.executeQuery("SELECT COUNT(*) FROM knowledge_base");
 
             if (resultSet.next() && resultSet.getInt(1) == 0) {
-                // If knowledge base is empty, add initial data
-                addKnowledgeBaseEntry("WiFi", "connection,network,internet,wifi",
+                // Network Issues
+                addKnowledgeBaseEntry("WiFi", "connection,network,internet,wifi,wireless",
                         "Unable to connect to WiFi",
                         "1. Check if WiFi is turned on (look for physical switch or function key)\n" +
                                 "2. Ensure airplane mode is off\n" +
@@ -63,23 +63,81 @@ public class DatabaseService {
                                 "4. Forget the network and reconnect\n" +
                                 "5. Verify your password is correct");
 
+                addKnowledgeBaseEntry("Network", "slow,internet,speed,connection,network",
+                        "Slow Internet Connection",
+                        "1. Run a speed test at speedtest.net\n" +
+                                "2. Check other devices on the network\n" +
+                                "3. Position your device closer to the router\n" +
+                                "4. Clear browser cache and cookies\n" +
+                                "5. Contact your ISP if problems persist");
+
+                // System Issues
+                addKnowledgeBaseEntry("System", "slow,performance,computer,laptop,pc",
+                        "Computer Running Slowly",
+                        "1. Check Task Manager for resource usage\n" +
+                                "2. Close unnecessary programs\n" +
+                                "3. Run disk cleanup and defragmentation\n" +
+                                "4. Update Windows and drivers\n" +
+                                "5. Consider adding more RAM or upgrading to SSD");
+
+                addKnowledgeBaseEntry("Windows", "blue,screen,crash,error,bsod",
+                        "Blue Screen of Death (BSOD)",
+                        "1. Note down the error code\n" +
+                                "2. Update all drivers\n" +
+                                "3. Run Windows Memory Diagnostic\n" +
+                                "4. Check for malware\n" +
+                                "5. System restore to last known good configuration");
+
+                // Hardware Issues
+                addKnowledgeBaseEntry("Printer", "printing,printer,scan,copy,document",
+                        "Printer not working",
+                        "1. Check if printer is powered on and connected\n" +
+                                "2. Verify paper and ink/toner levels\n" +
+                                "3. Clear print queue\n" +
+                                "4. Check for paper jams\n" +
+                                "5. Reinstall printer drivers");
+
+                addKnowledgeBaseEntry("Hardware", "usb,device,external,drive,hardware",
+                        "USB Device Not Recognized",
+                        "1. Try a different USB port\n" +
+                                "2. Unplug other USB devices\n" +
+                                "3. Check Device Manager for errors\n" +
+                                "4. Update USB drivers\n" +
+                                "5. Restart computer with device plugged in");
+
+                // Software Issues
+                addKnowledgeBaseEntry("Software", "install,program,application,software,app",
+                        "Program Won't Install",
+                        "1. Check system requirements\n" +
+                                "2. Run as administrator\n" +
+                                "3. Disable antivirus temporarily\n" +
+                                "4. Clean temp files\n" +
+                                "5. Download fresh copy of installer");
+
+                addKnowledgeBaseEntry("Browser", "chrome,firefox,edge,browser,internet",
+                        "Browser Issues",
+                        "1. Clear browser cache and cookies\n" +
+                                "2. Disable extensions\n" +
+                                "3. Update browser to latest version\n" +
+                                "4. Check for malware\n" +
+                                "5. Reset browser settings");
+
+                // Security Issues
+                addKnowledgeBaseEntry("Security", "virus,malware,antivirus,security,protection",
+                        "Suspected Malware Infection",
+                        "1. Run full system antivirus scan\n" +
+                                "2. Update antivirus definitions\n" +
+                                "3. Boot in Safe Mode if needed\n" +
+                                "4. Check startup programs\n" +
+                                "5. Consider system restore");
+
                 addKnowledgeBaseEntry("Password", "forgot,reset,password,account,login",
-                        "Forgot password or need to reset",
+                        "Password Reset Required",
                         "1. Visit the account recovery page\n" +
                                 "2. Click on 'Forgot password'\n" +
                                 "3. Enter your email address\n" +
                                 "4. Check your email for reset instructions\n" +
                                 "5. Create a new strong password");
-
-                addKnowledgeBaseEntry("Printer", "printing,printer,scan,copy,document",
-                        "Printer not working",
-                        "1. Check if printer is powered on and connected\n" +
-                                "2. Verify paper and ink/toner levels\n" +
-                                "3. Restart the printer\n" +
-                                "4. Check for paper jams\n" +
-                                "5. Reinstall printer drivers");
-
-                // Add more entries for other categories...
             }
 
             resultSet.close();

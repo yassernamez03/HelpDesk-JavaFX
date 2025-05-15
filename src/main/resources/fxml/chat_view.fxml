@@ -15,7 +15,7 @@
     <!-- Navigation Bar -->
     <left>
         <VBox styleClass="nav-bar">
-            <Button styleClass="nav-button, nav-button-active">
+            <Button fx:id="chatButton" onAction="#showChatView" styleClass="nav-button, nav-button-active">
                 <graphic>
                     <FontIcon iconLiteral="fa-comments" iconSize="20"/>
                 </graphic>
@@ -23,7 +23,7 @@
                     <Tooltip text="Chat" />
                 </tooltip>
             </Button>
-            <Button styleClass="nav-button">
+            <Button fx:id="knowledgeBaseButton" onAction="#showKnowledgeBaseView" styleClass="nav-button">
                 <graphic>
                     <FontIcon iconLiteral="fa-book" iconSize="20"/>
                 </graphic>
@@ -31,7 +31,7 @@
                     <Tooltip text="Knowledge Base" />
                 </tooltip>
             </Button>
-            <Button styleClass="nav-button">
+            <Button fx:id="historyButton" onAction="#showHistoryView" styleClass="nav-button">
                 <graphic>
                     <FontIcon iconLiteral="fa-history" iconSize="20"/>
                 </graphic>
@@ -52,35 +52,83 @@
     </left>
 
     <center>
-        <BorderPane>
-            <!-- Header -->
-            <top>
-                <HBox styleClass="header" alignment="CENTER_LEFT">
-                    <Label text="IT Support Helpdesk" styleClass="header-text"/>
-                    <Pane HBox.hgrow="ALWAYS" />
-                </HBox>
-            </top>
+        <StackPane>
+            <!-- Chat View -->
+            <BorderPane fx:id="chatView">
+                <!-- Header -->
+                <top>
+                    <HBox styleClass="header" alignment="CENTER_LEFT">
+                        <Label text="IT Support Helpdesk" styleClass="header-text"/>
+                        <Pane HBox.hgrow="ALWAYS" />
+                    </HBox>
+                </top>
 
-            <!-- Chat area -->
-            <center>
-                <ScrollPane fx:id="chatScrollPane" fitToWidth="true" styleClass="chat-area" vbarPolicy="ALWAYS">
-                    <VBox fx:id="chatContainer" spacing="15">
-                        <padding>
-                            <Insets top="15" right="15" bottom="15" left="15"/>
-                        </padding>
+                <!-- Chat area -->
+                <center>
+                    <ScrollPane fx:id="chatScrollPane" fitToWidth="true" styleClass="chat-area" vbarPolicy="ALWAYS">
+                        <VBox fx:id="chatContainer" spacing="15">
+                            <padding>
+                                <Insets top="15" right="15" bottom="15" left="15"/>
+                            </padding>
+                        </VBox>
+                    </ScrollPane>
+                </center>
+
+                <!-- Input area -->
+                <bottom>
+                    <HBox spacing="10" styleClass="input-area" alignment="CENTER">
+                        <TextField fx:id="messageInput" promptText="Ask me anything about IT..."
+                                HBox.hgrow="ALWAYS" onAction="#sendMessage"/>
+                        <Button text="Send" onAction="#sendMessage" styleClass="send-button"/>
+                    </HBox>
+                </bottom>
+            </BorderPane>
+
+            <!-- Knowledge Base View -->
+            <BorderPane fx:id="knowledgeBaseView" visible="false">
+                <top>
+                    <VBox>
+                        <HBox styleClass="header" alignment="CENTER_LEFT">
+                            <Label text="Knowledge Base" styleClass="header-text"/>
+                            <Pane HBox.hgrow="ALWAYS" />
+                        </HBox>
+                        <TextField fx:id="searchField" promptText="Search knowledge base..."
+                                styleClass="search-field">
+                            <VBox.margin>
+                                <Insets top="10" right="15" bottom="10" left="15"/>
+                            </VBox.margin>
+                        </TextField>
                     </VBox>
-                </ScrollPane>
-            </center>
+                </top>
+                <center>
+                    <ScrollPane fitToWidth="true" styleClass="kb-area">
+                        <VBox fx:id="kbContainer" spacing="15">
+                            <padding>
+                                <Insets top="15" right="15" bottom="15" left="15"/>
+                            </padding>
+                        </VBox>
+                    </ScrollPane>
+                </center>
+            </BorderPane>
 
-            <!-- Input area -->
-            <bottom>
-                <HBox spacing="10" styleClass="input-area" alignment="CENTER">
-                    <TextField fx:id="messageInput" promptText="Ask me anything about IT..."
-                            HBox.hgrow="ALWAYS" onAction="#sendMessage"/>
-                    <Button text="Send" onAction="#sendMessage" styleClass="send-button"/>
-                </HBox>
-            </bottom>
-        </BorderPane>
+            <!-- History View -->
+            <BorderPane fx:id="historyView" visible="false">
+                <top>
+                    <HBox styleClass="header" alignment="CENTER_LEFT">
+                        <Label text="Chat History" styleClass="header-text"/>
+                        <Pane HBox.hgrow="ALWAYS" />
+                    </HBox>
+                </top>
+                <center>
+                    <ScrollPane fitToWidth="true" styleClass="chat-area">
+                        <VBox fx:id="historyContainer" spacing="15">
+                            <padding>
+                                <Insets top="15" right="15" bottom="15" left="15"/>
+                            </padding>
+                        </VBox>
+                    </ScrollPane>
+                </center>
+            </BorderPane>
+        </StackPane>
     </center>
-
 </BorderPane>

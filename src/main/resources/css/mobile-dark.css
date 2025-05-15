@@ -444,3 +444,145 @@
 .nav-button-active:hover .ikonli-font-icon {
     -fx-icon-color: #63B3ED;
 }
+
+/* Knowledge Base Styles - Dark Theme */
+.kb-area {
+    background-color: transparent;
+    -fx-background-color: transparent;
+}
+
+.kb-area > .viewport {
+    background-color: transparent;
+    -fx-background-color: transparent;
+}
+
+.kb-card {
+    background-color: #1A202C;
+    -fx-background-color: #1A202C;
+    padding: 20px;
+    -fx-padding: 20px;    margin: 10px 0;
+    -fx-spacing: 15;
+    border-radius: 12px;
+    -fx-background-radius: 12px;
+    border-color: #2D3748;
+    -fx-border-color: #2D3748;
+    border-width: 1px;
+    -fx-border-width: 1;
+    border-style: solid;
+    -fx-border-style: solid;
+}
+
+.kb-tag {
+    background-color: #2C5282;
+    -fx-background-color: #2C5282;
+    padding: 4px 8px;
+    -fx-padding: 4px 8px;
+    border-radius: 4px;
+    -fx-background-radius: 4px;
+    font-size: 12px;
+    -fx-font-size: 12px;
+    -fx-text-fill: #EBF8FF;
+}
+
+.kb-problem {
+    font-size: 18px;
+    -fx-font-size: 18px;
+    font-weight: bold;
+    -fx-font-weight: bold;
+    -fx-text-fill: #EDF2F7;
+    padding: 10px 0;
+    -fx-padding: 10px 0;
+}
+
+.kb-keywords {
+    margin: 5px 0;
+    -fx-spacing: 5;
+}
+
+.kb-keyword-tag {
+    background-color: #4A5568;
+    -fx-background-color: #4A5568;
+    padding: 3px 8px;
+    -fx-padding: 3px 8px;
+    border-radius: 12px;
+    -fx-background-radius: 12px;
+    font-size: 12px;
+    -fx-font-size: 12px;
+    -fx-text-fill: #E2E8F0;
+}
+
+.kb-solution {
+    background-color: #1A202C;
+    -fx-background-color: #1A202C;
+    padding: 15px;
+    -fx-padding: 15px;
+    border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-spacing: 10;
+}
+
+.kb-step {
+    font-size: 14px;
+    -fx-font-size: 14px;
+    -fx-text-fill: #E2E8F0;
+}
+
+.kb-use-button {
+    background-color: #3182CE;
+    -fx-background-color: #3182CE;
+    -fx-text-fill: white;
+    padding: 10px 20px;
+    -fx-padding: 10px 20px;
+    border-radius: 6px;
+    -fx-background-radius: 6px;
+    cursor: hand;
+    -fx-cursor: hand;
+}
+
+.kb-use-button:hover {
+    background-color: #2B6CB0;
+    -fx-background-color: #2B6CB0;
+}
+
+.kb-feedback-button {
+    font-size: 12px;
+    -fx-font-size: 12px;
+    padding: 6px 12px;
+    -fx-padding: 6px 12px;
+    border-radius: 4px;
+    -fx-background-radius: 4px;
+    cursor: hand;
+    -fx-cursor: hand;
+}
+
+.kb-feedback-button.helpful {
+    background-color: #276749;
+    -fx-background-color: #276749;
+    -fx-text-fill: #C6F6D5;
+}
+
+.kb-feedback-button.not-helpful {
+    background-color: #9B2C2C;
+    -fx-background-color: #9B2C2C;
+    -fx-text-fill: #FED7D7;
+}
+
+.search-field {
+    background-color: #1A202C;
+    -fx-background-color: #1A202C;
+    -fx-background-radius: 20px;
+    padding: 12px 20px;
+    -fx-padding: 12px 20px;
+    font-size: 14px;
+    -fx-font-size: 14px;
+    border-radius: 20px;
+    -fx-border-radius: 20px;
+    border-color: #2D3748;
+    -fx-border-color: #2D3748;
+    border-width: 1px;
+    -fx-border-width: 1;
+    border-style: solid;
+    -fx-border-style: solid;
+    -fx-text-fill: #E2E8F0;
+    color: #E2E8F0;
+}

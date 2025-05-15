@@ -1,0 +1,30 @@
+.search-field {
+    /* Standard CSS properties */
+    background-color: white;
+    background-radius: 20px;
+    border-color: #bdc3c7;
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 20px;
+    padding: 8px 12px;
+    font-size: 14px;
+
+    /* JavaFX specific properties */
+    -fx-background-color: white;
+    -fx-background-radius: 20px;
+    -fx-border-color: #bdc3c7;
+    -fx-border-width: 1;
+    -fx-border-style: solid;
+    -fx-border-radius: 20px;
+    -fx-padding: 8px 12px;
+    -fx-font-size: 14px;
+}
+
+.search-field:focused {
+    /* Standard CSS properties */
+    border-color: #3498db;
+
+    /* JavaFX specific properties */
+    -fx-border-color: #3498db;
+    -fx-effect: dropshadow(gaussian, rgba(52,152,219,0.2), 10, 0, 0, 0);
+}

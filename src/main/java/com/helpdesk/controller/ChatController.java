@@ -1,6 +1,7 @@
 package com.helpdesk.controller;
 
 import com.helpdesk.model.ChatMessage;
+import com.helpdesk.model.KnowledgeBase;
 import com.helpdesk.service.GroqService;
 import com.helpdesk.service.DatabaseService;
 import com.helpdesk.service.ResponseGenerator;
@@ -14,21 +15,24 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.prefs.Preferences;
+import java.util.stream.Collectors;
 
-public class  ChatController {
-
-    @FXML
+public class ChatController {    @FXML
     private ScrollPane chatScrollPane;
 
     @FXML
@@ -36,6 +40,24 @@ public class  ChatController {
 
     @FXML
     private TextField messageInput;
+
+    @FXML
+    private BorderPane chatView;
+
+    @FXML
+    private BorderPane knowledgeBaseView;
+
+    @FXML
+    private BorderPane historyView;
+
+    @FXML
+    private VBox kbContainer;
+
+    @FXML
+    private VBox historyContainer;
+
+    @FXML
+    private TextField searchField;
 
     private GroqService groqService;
     private DatabaseService databaseService;
@@ -63,6 +85,11 @@ public class  ChatController {
 
             // Add suggestion buttons
             addSuggestionButtons();
+        });
+
+        // Setup search functionality
+        searchField.textProperty().addListener((observable, oldValue, newValue) -> {
+            loadKnowledgeBase(newValue);
         });
     }
 
@@ -359,5 +386,146 @@ public class  ChatController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @FXML
+    public void showKnowledgeBaseView() {
+        chatView.setVisible(false);
+        knowledgeBaseView.setVisible(true);
+        historyView.setVisible(false);
+        loadKnowledgeBase("");
+    }
+
+    @FXML
+    public void showChatView() {
+        chatView.setVisible(true);
+        knowledgeBaseView.setVisible(false);
+        historyView.setVisible(false);
+    }
+
+    @FXML
+    public void showHistoryView() {
+        chatView.setVisible(false);
+        knowledgeBaseView.setVisible(false);
+        historyView.setVisible(true);
+        loadChatHistory();
+    }
+
+    private void loadKnowledgeBase(String searchQuery) {
+        kbContainer.getChildren().clear();
+        List<KnowledgeBase> entries = databaseService.getKnowledgeBase();
+
+        // Group entries by category
+        Map<String, List<KnowledgeBase>> categorizedEntries = entries.stream()
+                .filter(entry -> searchQuery.isEmpty() ||
+                        entry.getProblem().toLowerCase().contains(searchQuery.toLowerCase()) ||
+                        entry.getKeywords().toLowerCase().contains(searchQuery.toLowerCase()))
+                .collect(Collectors.groupingBy(KnowledgeBase::getCategory));
+
+        categorizedEntries.forEach((category, categoryEntries) -> {
+            // Create category section
+            Label categoryLabel = new Label(category);
+            categoryLabel.getStyleClass().add("kb-category");
+            kbContainer.getChildren().add(categoryLabel);
+
+            // Create cards for each entry
+            categoryEntries.forEach(entry -> {
+                VBox card = createKnowledgeBaseCard(entry);
+                kbContainer.getChildren().add(card);
+            });
+        });
+    }
+
+    private void loadChatHistory() {
+        historyContainer.getChildren().clear();
+        List<ChatMessage> history = databaseService.getConversationHistory();
+        
+        for (ChatMessage message : history) {
+            if (message.isUser()) {
+                addUserMessage(message.getContent(), message.getTimestamp());
+            } else {
+                addBotMessage(message.getContent(), message.getTimestamp());
+            }
+        }
+    }
+
+    private VBox createKnowledgeBaseCard(KnowledgeBase entry) {
+        VBox card = new VBox(10);
+        card.getStyleClass().add("kb-card");
+
+        // Category tag
+        Label categoryTag = new Label(entry.getCategory());
+        categoryTag.getStyleClass().add("kb-tag");
+
+        // Problem title
+        Label problemLabel = new Label(entry.getProblem());
+        problemLabel.getStyleClass().add("kb-problem");
+        problemLabel.setWrapText(true);
+
+        // Keywords
+        HBox keywordsBox = new HBox(5);
+        keywordsBox.getStyleClass().add("kb-keywords");
+        for (String keyword : entry.getKeywords().split(",")) {
+            Label keywordTag = new Label(keyword.trim());
+            keywordTag.getStyleClass().add("kb-keyword-tag");
+            keywordsBox.getChildren().add(keywordTag);
+        }
+
+        // Solution content
+        VBox solutionBox = new VBox(5);
+        solutionBox.getStyleClass().add("kb-solution");
+        
+        // Parse and format the solution steps
+        String[] steps = entry.getSolution().split("\n");
+        for (String step : steps) {
+            if (!step.trim().isEmpty()) {
+                Label stepLabel = new Label(step.trim());
+                stepLabel.setWrapText(true);
+                stepLabel.getStyleClass().add("kb-step");
+                solutionBox.getChildren().add(stepLabel);
+            }
+        }
+
+        // Use in Chat button with icon
+        Button useInChatButton = new Button("Use in Chat");
+        FontIcon chatIcon = new FontIcon("fa-comments");  
+        chatIcon.setIconSize(14);
+        useInChatButton.setGraphic(chatIcon);
+        useInChatButton.getStyleClass().add("kb-use-button");
+        useInChatButton.setOnAction(e -> {
+            showChatView();
+            messageInput.setText(entry.getProblem());
+            sendMessage();
+        });
+
+        // Optional feedback buttons
+        HBox feedbackBox = new HBox(10);
+        feedbackBox.setAlignment(Pos.CENTER_RIGHT);
+        
+        Button helpfulButton = new Button("Helpful");
+        helpfulButton.getStyleClass().addAll("kb-feedback-button", "helpful");
+        FontIcon thumbsUpIcon = new FontIcon("fa-thumbs-up");
+        thumbsUpIcon.setIconSize(14);
+        helpfulButton.setGraphic(thumbsUpIcon);
+        
+        Button notHelpfulButton = new Button("Not Helpful");
+        notHelpfulButton.getStyleClass().addAll("kb-feedback-button", "not-helpful");
+        FontIcon thumbsDownIcon = new FontIcon("fa-thumbs-down");
+        thumbsDownIcon.setIconSize(14);
+        notHelpfulButton.setGraphic(thumbsDownIcon);
+        
+        feedbackBox.getChildren().addAll(helpfulButton, notHelpfulButton);
+
+        // Add all components to the card
+        card.getChildren().addAll(
+            categoryTag,
+            problemLabel,
+            keywordsBox,
+            solutionBox,
+            useInChatButton,
+            feedbackBox
+        );
+
+        return card;
     }
 }
