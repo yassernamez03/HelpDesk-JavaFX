@@ -18,6 +18,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -26,6 +27,7 @@ import org.kordamp.ikonli.javafx.FontIcon;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -72,6 +74,12 @@ public class ChatController {
     @FXML
     private Button settingsButton;
 
+    @FXML
+    private Button newChatButton;
+
+    @FXML
+    private TextField historySearchField;
+
     private GroqService groqService;
     private DatabaseService databaseService;
     private ResponseGenerator responseGenerator;
@@ -104,6 +112,13 @@ public class ChatController {
         searchField.textProperty().addListener((observable, oldValue, newValue) -> {
             loadKnowledgeBase(newValue);
         });
+
+        // Add history search functionality
+        if (historySearchField != null) {
+            historySearchField.textProperty().addListener((observable, oldValue, newValue) -> {
+                loadChatHistory();
+            });
+        }
     }
 
     private void applyCurrentTheme() {
@@ -437,6 +452,20 @@ public class ChatController {
         loadChatHistory();
     }
 
+    @FXML
+    public void startNewChat() {
+        chatContainer.getChildren().clear();
+        
+        // Add welcome message
+        addBotMessage("👋 Hi there! I'm your IT Support assistant. How can I help you today?", LocalDateTime.now());
+
+        // Add suggestion buttons
+        addSuggestionButtons();
+
+        // Switch to chat view if not already there
+        showChatView();
+    }
+
     private void loadKnowledgeBase(String searchQuery) {
         kbContainer.getChildren().clear();
         List<KnowledgeBase> entries = databaseService.getKnowledgeBase();
@@ -464,15 +493,133 @@ public class ChatController {
 
     private void loadChatHistory() {
         historyContainer.getChildren().clear();
-        List<ChatMessage> history = databaseService.getConversationHistory();
+        String searchQuery = historySearchField != null ? historySearchField.getText() : "";
+        List<DatabaseService.Conversation> conversations = databaseService.getConversationHistory(searchQuery);
         
-        for (ChatMessage message : history) {
-            if (message.isUser()) {
-                addUserMessage(message.getContent(), message.getTimestamp());
-            } else {
-                addBotMessage(message.getContent(), message.getTimestamp());
-            }
+        // Group conversations by date
+        Map<LocalDateTime, List<DatabaseService.Conversation>> conversationsByDate = conversations.stream()
+                .collect(Collectors.groupingBy(
+                    conv -> conv.getTimestamp().toLocalDate().atStartOfDay(),
+                    LinkedHashMap::new,
+                    Collectors.toList()
+                ));
+
+        conversationsByDate.forEach((date, convs) -> {
+            // Add date header
+            Label dateLabel = new Label(date.toLocalDate().format(DateTimeFormatter.ofPattern("MMMM d, yyyy")));
+            dateLabel.getStyleClass().add("history-date-header");
+            historyContainer.getChildren().add(dateLabel);
+
+            // Add each conversation for this date
+            convs.forEach(conv -> {
+                VBox conversationBox = new VBox(10);
+                conversationBox.getStyleClass().add("history-conversation-box");
+
+                // Create preview of the conversation
+                VBox previewBox = new VBox(5);
+                previewBox.getStyleClass().add("conversation-preview");
+
+                // Add timestamp
+                Label timestampLabel = new Label(conv.getTimestamp().format(timeFormatter));
+                timestampLabel.getStyleClass().add("conversation-timestamp");
+
+                // Add first bot response preview
+                Text previewText = new Text(conv.getFirstBotResponse());
+                previewText.setWrappingWidth(300);
+                previewText.getStyleClass().add("conversation-preview-text");
+
+                previewBox.getChildren().addAll(timestampLabel, previewText);
+
+                // Add conversation actions
+                HBox actionBar = new HBox(10);
+                actionBar.setAlignment(Pos.CENTER_RIGHT);
+                actionBar.getStyleClass().add("conversation-actions");
+
+                // Expand/Collapse button
+                Button expandButton = new Button("", new FontIcon("fa-chevron-down"));
+                expandButton.getStyleClass().add("expand-button");
+
+                // Continue button
+                Button continueButton = new Button("Continue", new FontIcon("fa-arrow-right"));
+                continueButton.getStyleClass().addAll("history-action-button", "continue-button");
+                continueButton.setOnAction(e -> continueConversation(conv.getMessages().get(0).getContent()));
+
+                // Delete button
+                Button deleteButton = new Button("Delete", new FontIcon("fa-trash"));
+                deleteButton.getStyleClass().addAll("history-action-button", "delete-button");
+                deleteButton.setOnAction(e -> {
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                    alert.setTitle("Delete Conversation");
+                    alert.setHeaderText("Delete this conversation?");
+                    alert.setContentText("This action cannot be undone.");
+
+                    alert.showAndWait().ifPresent(response -> {
+                        if (response == ButtonType.OK) {
+                            ChatMessage firstMsg = conv.getMessages().get(0);
+                            ChatMessage firstBotMsg = conv.getMessages().get(1);
+                            databaseService.deleteConversation(
+                                firstMsg.getContent(),
+                                firstBotMsg.getContent(),
+                                firstMsg.getTimestamp()
+                            );
+                            loadChatHistory();
+                        }
+                    });
+                });
+
+                actionBar.getChildren().addAll(expandButton, deleteButton, continueButton);
+
+                // Create expandable detail view
+                VBox detailView = new VBox(10);
+                detailView.getStyleClass().add("conversation-detail");
+                detailView.setVisible(false);
+                detailView.setManaged(false);
+
+                // Add all messages to detail view
+                conv.getMessages().forEach(msg -> addHistoryMessage(detailView, msg));
+
+                // Setup expand/collapse functionality
+                expandButton.setOnAction(e -> {
+                    boolean isExpanded = detailView.isVisible();
+                    detailView.setVisible(!isExpanded);
+                    detailView.setManaged(!isExpanded);
+                    ((FontIcon)expandButton.getGraphic()).setIconLiteral(
+                        isExpanded ? "fa-chevron-down" : "fa-chevron-up"
+                    );
+                });
+
+                conversationBox.getChildren().addAll(previewBox, actionBar, detailView);
+                historyContainer.getChildren().add(conversationBox);
+            });
+        });
+    }
+
+    private void addHistoryMessage(VBox container, ChatMessage message) {
+        VBox messageBox = new VBox(3);
+        messageBox.getStyleClass().add(message.isUser() ? "user-message" : "bot-message");
+
+        Label timestampLabel = new Label(message.getTimestamp().format(timeFormatter));
+        timestampLabel.getStyleClass().add("message-timestamp");
+        
+        VBox contentBox = new VBox();
+        if (message.isUser()) {
+            Label contentLabel = new Label(message.getContent());
+            contentLabel.setWrapText(true);
+            contentBox.getChildren().add(contentLabel);
+        } else {
+            contentBox.getChildren().add(
+                com.helpdesk.util.MarkdownRenderer.renderMarkdown(message.getContent())
+            );
         }
+
+        messageBox.getChildren().addAll(timestampLabel, contentBox);
+        container.getChildren().add(messageBox);
+    }
+
+    private void continueConversation(String message) {
+        showChatView();
+        messageInput.setText(message);
+        sendMessage();
     }
 
     private VBox createKnowledgeBaseCard(KnowledgeBase entry) {

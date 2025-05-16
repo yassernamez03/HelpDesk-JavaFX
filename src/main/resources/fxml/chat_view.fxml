@@ -60,6 +60,14 @@
                     <HBox styleClass="header" alignment="CENTER_LEFT">
                         <Label text="IT Support Helpdesk" styleClass="header-text"/>
                         <Pane HBox.hgrow="ALWAYS" />
+                        <Button fx:id="newChatButton" onAction="#startNewChat" styleClass="header-button">
+                            <graphic>
+                                <FontIcon iconLiteral="fa-plus-circle" iconSize="16"/>
+                            </graphic>
+                            <tooltip>
+                                <Tooltip text="New Chat" />
+                            </tooltip>
+                        </Button>
                     </HBox>
                 </top>
 
@@ -114,10 +122,18 @@
             <!-- History View -->
             <BorderPane fx:id="historyView" visible="false">
                 <top>
-                    <HBox styleClass="header" alignment="CENTER_LEFT">
-                        <Label text="Chat History" styleClass="header-text"/>
-                        <Pane HBox.hgrow="ALWAYS" />
-                    </HBox>
+                    <VBox>
+                        <HBox styleClass="header" alignment="CENTER_LEFT">
+                            <Label text="Chat History" styleClass="header-text"/>
+                            <Pane HBox.hgrow="ALWAYS" />
+                        </HBox>
+                        <TextField fx:id="historySearchField" promptText="Search conversations..."
+                                styleClass="search-field">
+                            <VBox.margin>
+                                <Insets top="10" right="15" bottom="10" left="15"/>
+                            </VBox.margin>
+                        </TextField>
+                    </VBox>
                 </top>
                 <center>
                     <ScrollPane fitToWidth="true" styleClass="chat-area">

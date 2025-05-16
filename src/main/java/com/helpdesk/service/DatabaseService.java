@@ -4,6 +4,7 @@ import com.helpdesk.model.ChatMessage;
 import com.helpdesk.model.KnowledgeBase;
 
 import java.sql.*;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -219,29 +220,73 @@ public class DatabaseService {
         return knowledgeBaseList;
     }
 
-    public List<ChatMessage> getConversationHistory() {
-        List<ChatMessage> history = new ArrayList<>();
+    public static class Conversation {
+        private final String firstBotResponse;
+        private final List<ChatMessage> messages;
+        private final LocalDateTime timestamp;
+
+        public Conversation(String firstBotResponse, List<ChatMessage> messages, LocalDateTime timestamp) {
+            this.firstBotResponse = firstBotResponse;
+            this.messages = messages;
+            this.timestamp = timestamp;
+        }
+
+        public String getFirstBotResponse() { return firstBotResponse; }
+        public List<ChatMessage> getMessages() { return messages; }
+        public LocalDateTime getTimestamp() { return timestamp; }
+    }
+
+    public List<Conversation> getConversationHistory(String searchQuery) {
+        List<Conversation> conversations = new ArrayList<>();
+        List<ChatMessage> currentConversation = new ArrayList<>();
+        String firstBotResponse = null;
+        LocalDateTime conversationTimestamp = null;
 
         try {
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT * FROM conversations ORDER BY timestamp");
+            String sql = searchQuery.isEmpty() 
+                ? "SELECT * FROM conversations ORDER BY timestamp"
+                : "SELECT * FROM conversations WHERE user_message LIKE ? OR bot_response LIKE ? ORDER BY timestamp";
+            
+            PreparedStatement statement = connection.prepareStatement(sql);
+            if (!searchQuery.isEmpty()) {
+                statement.setString(1, "%" + searchQuery + "%");
+                statement.setString(2, "%" + searchQuery + "%");
+            }
+            
+            ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                // Create and add user message
-                ChatMessage userMessage = new ChatMessage(
-                        resultSet.getString("user_message"),
-                        true,
-                        LocalDateTime.parse(resultSet.getString("timestamp"))
-                );
-                history.add(userMessage);
+                LocalDateTime timestamp = LocalDateTime.parse(resultSet.getString("timestamp"));
+                String userMessage = resultSet.getString("user_message");
+                String botResponse = resultSet.getString("bot_response");
 
-                // Create and add bot response
-                ChatMessage botResponse = new ChatMessage(
-                        resultSet.getString("bot_response"),
-                        false,
-                        LocalDateTime.parse(resultSet.getString("timestamp"))
-                );
-                history.add(botResponse);
+                // Create messages
+                ChatMessage userMsg = new ChatMessage(userMessage, true, timestamp);
+                ChatMessage botMsg = new ChatMessage(botResponse, false, timestamp);
+
+                // If this is the start of a new conversation (determined by time gap)
+                if (!currentConversation.isEmpty() && 
+                    Duration.between(currentConversation.get(currentConversation.size()-1).getTimestamp(), timestamp).toMinutes() > 30) {
+                    // Save the previous conversation
+                    conversations.add(new Conversation(firstBotResponse, new ArrayList<>(currentConversation), conversationTimestamp));
+                    currentConversation.clear();
+                    firstBotResponse = null;
+                }
+
+                // Add messages to current conversation
+                currentConversation.add(userMsg);
+                currentConversation.add(botMsg);
+
+                // Store first bot response and timestamp of this conversation
+                if (firstBotResponse == null) {
+                    firstBotResponse = botResponse;
+                    conversationTimestamp = timestamp;
+                }
+            }
+
+            // Add the last conversation if any
+            if (!currentConversation.isEmpty()) {
+                conversations.add(new Conversation(firstBotResponse, currentConversation, conversationTimestamp));
             }
 
             resultSet.close();
@@ -250,7 +295,21 @@ public class DatabaseService {
             e.printStackTrace();
         }
 
-        return history;
+        return conversations;
+    }
+
+    public void deleteConversation(String userMessage, String botResponse, LocalDateTime timestamp) {
+        try {
+            String sql = "DELETE FROM conversations WHERE user_message = ? AND bot_response = ? AND timestamp = ?";
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setString(1, userMessage);
+            statement.setString(2, botResponse);
+            statement.setString(3, timestamp.toString());
+            statement.executeUpdate();
+            statement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     public void close() {
