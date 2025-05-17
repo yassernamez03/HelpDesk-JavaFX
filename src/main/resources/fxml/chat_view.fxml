@@ -3,15 +3,14 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.*?>
+<?import javafx.scene.image.*?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.helpdesk.controller.ChatController"
             prefHeight="800.0" prefWidth="650.0"
-            styleClass="mobile-container">
-
-    <!-- Navigation Bar -->
+            styleClass="mobile-container">    <!-- Navigation Bar -->
     <left>
         <VBox styleClass="nav-bar">
             <Button fx:id="chatButton" onAction="#showChatView" styleClass="nav-button, nav-button-active">
@@ -20,6 +19,13 @@
                 </graphic>
                 <tooltip>
                     <Tooltip text="Chat" />
+                </tooltip>
+            </Button>            <Button fx:id="libraryButton" onAction="#showLibraryView" styleClass="nav-button">
+                <graphic>
+                    <FontIcon iconLiteral="fa-graduation-cap" iconSize="20"/>
+                </graphic>
+                <tooltip>
+                    <Tooltip text="Course Library" />
                 </tooltip>
             </Button>
             <Button fx:id="knowledgeBaseButton" onAction="#showKnowledgeBaseView" styleClass="nav-button">
@@ -89,6 +95,75 @@
                         <Button text="Send" onAction="#sendMessage" styleClass="send-button"/>
                     </HBox>
                 </bottom>
+            </BorderPane>            <!-- Library View -->
+            <BorderPane fx:id="libraryView" visible="false">
+                <top>
+                    <VBox>
+                        <HBox styleClass="header" alignment="CENTER_LEFT">
+                            <Label text="Course Library" styleClass="header-text"/>
+                            <Pane HBox.hgrow="ALWAYS" />
+                        </HBox>
+                        <TextField fx:id="librarySearchField" promptText="Search courses..."
+                                styleClass="search-field">
+                            <VBox.margin>
+                                <Insets top="10" right="15" bottom="10" left="15"/>
+                            </VBox.margin>
+                        </TextField>
+                    </VBox>
+                </top>                <center>
+                    <ScrollPane fitToWidth="true" styleClass="library-area">
+                        <VBox spacing="20">
+                            <padding>
+                                <Insets top="15" right="15" bottom="15" left="15"/>
+                            </padding>
+                            
+                            <!-- Featured Courses Section -->
+                            <VBox styleClass="section-container">
+                                <Label text="Featured Courses" styleClass="section-title"/>
+                                <FlowPane fx:id="coursesContainer" hgap="20" vgap="20" styleClass="courses-container">
+                                    <!-- Demo Course Card 1 -->
+                                    <VBox styleClass="course-card">
+                                        <ImageView fitWidth="280" fitHeight="160" preserveRatio="true">
+                                            <Image url="@../images/network-troubleshooting.jpg"/>
+                                        </ImageView>
+                                        <VBox styleClass="course-info">
+                                            <Label text="Network Troubleshooting Basics" styleClass="course-title"/>
+                                            <Label text="Learn the fundamentals of diagnosing and fixing common network issues" 
+                                                   styleClass="course-description" wrapText="true"/>
+                                            <Button text="Start Course" styleClass="course-button"/>
+                                        </VBox>
+                                    </VBox>
+                                    
+                                    <!-- Demo Course Card 2 -->
+                                    <VBox styleClass="course-card">
+                                        <ImageView fitWidth="280" fitHeight="160" preserveRatio="true">
+                                            <Image url="@../images/windows-security.jpg"/>
+                                        </ImageView>
+                                        <VBox styleClass="course-info">
+                                            <Label text="Windows Security Essentials" styleClass="course-title"/>
+                                            <Label text="Master essential Windows security practices and malware protection" 
+                                                   styleClass="course-description" wrapText="true"/>
+                                            <Button text="Start Course" styleClass="course-button"/>
+                                        </VBox>
+                                    </VBox>
+                                    
+                                    <!-- Demo Course Card 3 -->
+                                    <VBox styleClass="course-card">
+                                        <ImageView fitWidth="280" fitHeight="160" preserveRatio="true">
+                                            <Image url="@../images/software-installation.jpg"/>
+                                        </ImageView>
+                                        <VBox styleClass="course-info">
+                                            <Label text="Software Installation Guide" styleClass="course-title"/>
+                                            <Label text="Step-by-step guides for installing and configuring common software" 
+                                                   styleClass="course-description" wrapText="true"/>
+                                            <Button text="Start Course" styleClass="course-button"/>
+                                        </VBox>
+                                    </VBox>
+                                </FlowPane>
+                            </VBox>
+                        </VBox>
+                    </ScrollPane>
+                </center>
             </BorderPane>
 
             <!-- Knowledge Base View -->
@@ -109,10 +184,42 @@
                 </top>
                 <center>
                     <ScrollPane fitToWidth="true" styleClass="kb-area">
-                        <VBox fx:id="kbContainer" spacing="15">
+                        <VBox spacing="20">
                             <padding>
                                 <Insets top="15" right="15" bottom="15" left="15"/>
                             </padding>
+                              <!-- Quick Links Section -->
+                            <VBox styleClass="section-container">
+                                <Label text="Quick Links" styleClass="section-title"/>
+                                <FlowPane hgap="15" vgap="15" styleClass="quick-links-container">                                    <Button text="Network Guides" styleClass="kb-button">
+                                        <graphic>
+                                            <FontIcon iconLiteral="fa-sitemap" iconSize="16"/>
+                                        </graphic>
+                                    </Button>
+                                    <Button text="Software Help" styleClass="kb-button">
+                                        <graphic>
+                                            <FontIcon iconLiteral="fa-desktop" iconSize="16"/>
+                                        </graphic>
+                                    </Button>
+                                    <Button text="Security Tips" styleClass="kb-button">
+                                        <graphic>
+                                            <FontIcon iconLiteral="fa-lock" iconSize="16"/>
+                                        </graphic>
+                                    </Button>
+                                    <Button text="FAQs" styleClass="kb-button">
+                                        <graphic>
+                                            <FontIcon iconLiteral="fa-question-circle" iconSize="16"/>
+                                        </graphic>
+                                    </Button>
+                                </FlowPane>
+                            </VBox>
+                            
+                            <!-- Regular Content Container -->
+                            <VBox fx:id="kbContainer" spacing="15">
+                                <padding>
+                                    <Insets top="15" right="15" bottom="15" left="15"/>
+                                </padding>
+                            </VBox>
                         </VBox>
                     </ScrollPane>
                 </center>

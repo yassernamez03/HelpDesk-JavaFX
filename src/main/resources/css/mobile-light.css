@@ -727,3 +727,69 @@
     -fx-border-color: #bd2130;
     border-color: #bd2130;
 }
+
+/* Course Card Styles */
+.section-container {
+    -fx-spacing: 20;
+}
+
+.section-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2D3748;
+    -fx-padding: 0 0 10 0;
+}
+
+.courses-container {
+    -fx-padding: 10 0;
+}
+
+.course-card {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 0);
+    -fx-min-width: 280;
+    -fx-max-width: 280;
+    -fx-min-height: 320;
+}
+
+.course-card:hover {
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 15, 0, 0, 0);
+    -fx-translate-y: -2;
+}
+
+.course-card ImageView {
+    -fx-background-radius: 12 12 0 0;
+}
+
+.course-info {
+    -fx-spacing: 10;
+    -fx-padding: 15;
+}
+
+.course-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2D3748;
+}
+
+.course-description {
+    -fx-font-size: 14px;
+    -fx-text-fill: #4A5568;
+    -fx-wrap-text: true;
+    -fx-line-spacing: 1.2;
+}
+
+.course-button {
+    -fx-background-color: #3182CE;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-padding: 8 16;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+    -fx-font-weight: bold;
+}
+
+.course-button:hover {
+    -fx-background-color: #2B6CB0;
+}

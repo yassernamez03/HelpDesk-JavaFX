@@ -1,0 +1,49 @@
+/* Navigation Bar Styles - Dark Theme */
+.nav-bar {
+    -fx-background-color: #2D3748;
+    -fx-padding: 10px;
+    -fx-spacing: 8px;
+    -fx-min-width: 60px;
+    -fx-pref-width: 60px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 10, 0, 2, 0);
+}
+
+.nav-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 8px;
+    -fx-padding: 12px;
+    -fx-min-width: 40px;
+    -fx-min-height: 40px;
+    -fx-max-width: 40px;
+    -fx-max-height: 40px;
+    -fx-alignment: center;
+    -fx-cursor: hand;
+}
+
+.nav-button:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-button:pressed {
+    -fx-background-color: rgba(255, 255, 255, 0.15);
+}
+
+.nav-button .ikonli-font-icon {
+    -fx-icon-color: #A0AEC0;
+}
+
+.nav-button:hover .ikonli-font-icon {
+    -fx-icon-color: #E2E8F0;
+}
+
+.nav-button-active {
+    -fx-background-color: rgba(66, 153, 225, 0.2);
+}
+
+.nav-button-active .ikonli-font-icon {
+    -fx-icon-color: #4299E1;
+}
+
+.nav-button-active:hover .ikonli-font-icon {
+    -fx-icon-color: #63B3ED;
+}

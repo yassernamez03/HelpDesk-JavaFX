@@ -1,0 +1,52 @@
+.quick-links-container {
+    -fx-padding: 10px;
+    -fx-background-color: #1A202C;
+}
+
+.kb-button {
+    -fx-background-color: #2D3748;
+    -fx-text-fill: #E2E8F0;
+    -fx-padding: 15px 20px;
+    -fx-min-width: 150px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 4, 0, 0, 2);
+    -fx-cursor: hand;
+    -fx-alignment: center-left;
+    -fx-spacing: 10;
+}
+
+.kb-button:hover {
+    -fx-background-color: #4A5568;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.25), 6, 0, 0, 3);
+}
+
+.kb-button .ikonli-font-icon {
+    -fx-fill: #63B3ED;
+}
+
+/* Dark theme overrides for section container and titles */
+.section-container {
+    -fx-spacing: 20;
+}
+
+.section-title {
+    -fx-text-fill: #E2E8F0;
+}
+
+/* Dark theme knowledge base area */
+.kb-area {
+    -fx-background-color: #1A202C;
+}
+
+.kb-area .viewport {
+    -fx-background-color: #1A202C;
+}
+
+/* Search field dark theme */
+.search-field {
+    -fx-background-color: #2D3748;
+    -fx-text-fill: #E2E8F0;
+    -fx-prompt-text-fill: #A0AEC0;
+    -fx-border-color: #4A5568;
+}

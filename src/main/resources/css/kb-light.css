@@ -1,0 +1,25 @@
+.quick-links-container {
+    -fx-padding: 10px;
+}
+
+.kb-button {
+    -fx-background-color: #f5f5f5;
+    -fx-text-fill: #333;
+    -fx-padding: 15px 20px;
+    -fx-min-width: 150px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 4, 0, 0, 2);
+    -fx-cursor: hand;
+    -fx-alignment: center-left;
+    -fx-spacing: 10;
+}
+
+.kb-button:hover {
+    -fx-background-color: #e8e8e8;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 6, 0, 0, 3);
+}
+
+.kb-button .ikonli-font-icon {
+    -fx-fill: #2196F3;
+}

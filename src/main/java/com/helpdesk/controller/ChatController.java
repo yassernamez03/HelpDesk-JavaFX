@@ -1,6 +1,7 @@
 package com.helpdesk.controller;
 
 import com.helpdesk.model.ChatMessage;
+import com.helpdesk.model.Course;
 import com.helpdesk.model.KnowledgeBase;
 import com.helpdesk.service.GroqService;
 import com.helpdesk.service.DatabaseService;
@@ -16,6 +17,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
@@ -30,6 +32,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
@@ -49,6 +52,9 @@ public class ChatController {
 
     @FXML
     private BorderPane knowledgeBaseView;
+    
+    @FXML
+    private BorderPane libraryView;
 
     @FXML
     private BorderPane historyView;
@@ -61,9 +67,18 @@ public class ChatController {
 
     @FXML
     private TextField searchField;
+    
+    @FXML
+    private TextField librarySearchField;
+    
+    @FXML
+    private TextField historySearchField;
 
     @FXML
     private Button chatButton;
+
+    @FXML
+    private Button libraryButton;
 
     @FXML
     private Button knowledgeBaseButton;
@@ -78,7 +93,7 @@ public class ChatController {
     private Button newChatButton;
 
     @FXML
-    private TextField historySearchField;
+    private FlowPane coursesContainer;
 
     private GroqService groqService;
     private DatabaseService databaseService;
@@ -111,27 +126,38 @@ public class ChatController {
         // Setup search functionality
         searchField.textProperty().addListener((observable, oldValue, newValue) -> {
             loadKnowledgeBase(newValue);
-        });
-
-        // Add history search functionality
+        });        // Add history search functionality
         if (historySearchField != null) {
             historySearchField.textProperty().addListener((observable, oldValue, newValue) -> {
                 loadChatHistory();
             });
         }
+
+        // Add library search functionality
+        if (librarySearchField != null) {
+            librarySearchField.textProperty().addListener((observable, oldValue, newValue) -> {
+                // This will be handled by the LibraryController
+                loadCourses(newValue);
+            });
+        }
     }
 
     private void applyCurrentTheme() {
-        Scene scene = chatScrollPane.getScene();
+        String theme = preferences.get("theme", "light");
+        String mobileCssPath = theme.equals("dark") ? "/css/mobile-dark.css" : "/css/mobile-light.css";
+        String libraryCssPath = theme.equals("dark") ? "/css/library-dark.css" : "/css/library-light.css";
+        
+        Scene scene = chatView.getScene();
         if (scene != null) {
-            String theme = preferences.get("theme", "light");
-            String cssPath = theme.equals("dark")
-                    ? "/css/mobile-dark.css"
-                    : "/css/mobile-light.css";
-
             scene.getStylesheets().clear();
-            scene.getStylesheets().add(getClass().getResource(cssPath).toExternalForm());
+            scene.getStylesheets().addAll(
+                getClass().getResource(mobileCssPath).toExternalForm(),
+                getClass().getResource(libraryCssPath).toExternalForm()
+            );
         }
+        
+        // Initialize courses for the library
+        loadCourses("");
     }
 
     private void addSuggestionButtons() {
@@ -417,8 +443,8 @@ public class ChatController {
     }
 
     private void updateNavigationState(Button activeButton) {
-        // Remove active state from all buttons
-        chatButton.getStyleClass().remove("nav-button-active");
+        // Remove active state from all buttons        chatButton.getStyleClass().remove("nav-button-active");
+        libraryButton.getStyleClass().remove("nav-button-active");
         knowledgeBaseButton.getStyleClass().remove("nav-button-active");
         historyButton.getStyleClass().remove("nav-button-active");
         
@@ -431,6 +457,7 @@ public class ChatController {
         chatView.setVisible(false);
         knowledgeBaseView.setVisible(true);
         historyView.setVisible(false);
+        libraryView.setVisible(false);
         updateNavigationState(knowledgeBaseButton);
         loadKnowledgeBase("");
     }
@@ -440,6 +467,7 @@ public class ChatController {
         chatView.setVisible(true);
         knowledgeBaseView.setVisible(false);
         historyView.setVisible(false);
+        libraryView.setVisible(false);
         updateNavigationState(chatButton);
     }
 
@@ -448,6 +476,7 @@ public class ChatController {
         chatView.setVisible(false);
         knowledgeBaseView.setVisible(false);
         historyView.setVisible(true);
+        libraryView.setVisible(false);
         updateNavigationState(historyButton);
         loadChatHistory();
     }
@@ -464,6 +493,15 @@ public class ChatController {
 
         // Switch to chat view if not already there
         showChatView();
+    }
+
+    @FXML
+    public void showLibraryView() {
+        chatView.setVisible(false);
+        libraryView.setVisible(true);
+        knowledgeBaseView.setVisible(false);
+        historyView.setVisible(false);
+        updateNavigationState(libraryButton);
     }
 
     private void loadKnowledgeBase(String searchQuery) {
@@ -700,5 +738,45 @@ public class ChatController {
         );
 
         return card;
+    }
+
+    private void loadCourses(String searchText) {
+        if (coursesContainer == null) return;
+        
+        coursesContainer.getChildren().clear();
+        List<Course> courses = getCourses(); // This would normally come from a service
+        
+        if (searchText != null && !searchText.isEmpty()) {
+            courses = courses.stream()
+                .filter(course -> 
+                    course.getTitle().toLowerCase().contains(searchText.toLowerCase()) ||
+                    course.getDescription().toLowerCase().contains(searchText.toLowerCase()))
+                .collect(Collectors.toList());
+        }
+        
+        for (Course course : courses) {
+            VBox courseCard = course.createCourseCard();
+            coursesContainer.getChildren().add(courseCard);
+        }
+    }
+
+    private List<Course> getCourses() {
+        List<Course> courses = new ArrayList<>();
+        courses.add(new Course(
+            "Network Troubleshooting Basics",
+            "Learn the fundamentals of diagnosing and fixing common network issues",
+            "/images/network-troubleshooting.jpg"
+        ));
+        courses.add(new Course(
+            "Windows Security Essentials",
+            "Master essential Windows security practices and malware protection",
+            "/images/windows-security.jpg"
+        ));
+        courses.add(new Course(
+            "Software Installation Guide",
+            "Step-by-step guides for installing and configuring common software",
+            "/images/software-installation.jpg"
+        ));
+        return courses;
     }
 }

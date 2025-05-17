@@ -1,0 +1,76 @@
+/* Library specific styles - Dark Theme */
+.library-area {
+    -fx-background-color: transparent;
+}
+
+.library-area > .viewport {
+    -fx-background-color: transparent;
+}
+
+.courses-container {
+    -fx-padding: 20px;
+    -fx-hgap: 20px;
+    -fx-vgap: 20px;
+    -fx-alignment: center;
+}
+
+.course-card {
+    -fx-background-color: #1A202C;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 4);
+    -fx-background-radius: 12px;
+    -fx-min-width: 280px;
+    -fx-max-width: 280px;
+    -fx-spacing: 0;
+    -fx-border-color: #2D3748;
+    -fx-border-width: 1;
+    -fx-border-radius: 12px;
+}
+
+.course-info {
+    -fx-spacing: 10;
+    -fx-padding: 16px;
+}
+
+.course-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #F7FAFC;
+    -fx-wrap-text: true;
+}
+
+.course-description {
+    -fx-font-size: 14px;
+    -fx-text-fill: #A0AEC0;
+    -fx-wrap-text: true;
+    -fx-padding: 0 0 8px 0;
+}
+
+.course-button {
+    -fx-background-color: #4299E1;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 10px 20px;
+    -fx-background-radius: 6px;
+    -fx-cursor: hand;
+    -fx-min-width: 120px;
+}
+
+.course-button:hover {
+    -fx-background-color: #3182CE;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 4, 0, 0, 2);
+}
+
+.course-progress {
+    -fx-padding: 0 16px 16px 16px;
+}
+
+.section-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #F7FAFC;
+    -fx-padding: 0 0 16px 0;
+}
+
+.section-container {
+    -fx-spacing: 24px;
+}

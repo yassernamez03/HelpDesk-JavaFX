@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.helpdesk.controller.LibraryController"
+            fx:id="libraryView">
+            
+    <!-- Header -->
+    <top>
+        <VBox>
+            <HBox styleClass="header" alignment="CENTER_LEFT">
+                <Label text="Course Library" styleClass="header-text"/>
+                <Pane HBox.hgrow="ALWAYS" />
+            </HBox>
+            <TextField fx:id="searchField" promptText="Search courses..."
+                    styleClass="search-field">
+                <VBox.margin>
+                    <Insets top="10" right="15" bottom="10" left="15"/>
+                </VBox.margin>
+            </TextField>
+        </VBox>
+    </top>
+
+    <!-- Main Content -->
+    <center>
+        <ScrollPane fitToWidth="true" styleClass="library-area">
+            <VBox spacing="20">
+                <padding>
+                    <Insets top="15" right="15" bottom="15" left="15"/>
+                </padding>
+                
+                <!-- Courses Grid -->
+                <FlowPane fx:id="coursesContainer" hgap="20" vgap="20" styleClass="courses-container">
+                    <!-- Course cards will be added here dynamically -->
+                </FlowPane>
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>
