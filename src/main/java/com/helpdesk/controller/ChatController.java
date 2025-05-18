@@ -333,8 +333,52 @@ public class ChatController {
         // Create the message container (initially empty)
         VBox messageContentBox = new VBox();
         messageContentBox.getStyleClass().add("bot-message");
-
         messageContentBox.setMaxWidth(chatScrollPane.getWidth() * 0.75);
+
+        // Create a container for the message content and speaker button
+        HBox messageWithSpeakerBox = new HBox(10);
+        messageWithSpeakerBox.setAlignment(Pos.CENTER_LEFT);
+
+        // Add speaker button (initially hidden until animation completes)
+        Button speakerButton = new Button();
+        speakerButton.getStyleClass().addAll("speaker-button", "modern-button");
+        FontIcon speakerIcon = new FontIcon("fa-volume-up");
+        speakerIcon.setIconSize(16);
+        speakerButton.setGraphic(speakerIcon);
+        speakerButton.setTooltip(new Tooltip("Listen to this message"));
+//        speakerButton.setVisible(false); // Hide until animation completes
+
+        // Set the action for the speaker button
+        speakerButton.setOnAction(e -> {
+            speakerButton.setDisable(true); // Disable button while processing
+
+            // Show a loading indicator on the button
+            FontIcon loadingIcon = new FontIcon("fa-spinner");
+            loadingIcon.setIconSize(16);
+            loadingIcon.getStyleClass().add("fa-spin");
+            speakerButton.setGraphic(loadingIcon);
+
+            // Process TTS in background
+            CompletableFuture.runAsync(() -> {
+                try {
+                    playTextToSpeech(fullMessage);
+                } catch (Exception ex) {
+                    Platform.runLater(() -> {
+                        showAlert("Error", "Could not play audio: " + ex.getMessage());
+                    });
+                } finally {
+                    Platform.runLater(() -> {
+                        // Restore original icon and enable button
+                        speakerButton.setGraphic(speakerIcon);
+                        speakerButton.setDisable(false);
+                    });
+                }
+            });
+        });
+
+        speakerButton.setStyle("-fx-padding: 5; -fx-background-color: #f0f0f0;");
+
+        messageWithSpeakerBox.getChildren().addAll(messageContentBox, speakerButton);
 
         // We'll add content to this incrementally
         StringBuilder currentText = new StringBuilder();
@@ -342,7 +386,6 @@ public class ChatController {
         // Add feedback buttons
         HBox feedbackButtons = new HBox(5);
         feedbackButtons.getStyleClass().add("feedback-buttons");
-        feedbackButtons.setVisible(false); // Hide until animation completes
 
         Button helpfulButton = new Button("👍 Helpful");
         helpfulButton.getStyleClass().add("feedback-button");
@@ -354,7 +397,7 @@ public class ChatController {
 
         feedbackButtons.getChildren().addAll(helpfulButton, notHelpfulButton);
 
-        botMessageBox.getChildren().addAll(timestampLabel, messageContentBox, feedbackButtons);
+        botMessageBox.getChildren().addAll(timestampLabel, messageWithSpeakerBox, feedbackButtons);
 
         HBox messageContainer = new HBox();
         messageContainer.setAlignment(Pos.CENTER_LEFT);
@@ -379,8 +422,9 @@ public class ChatController {
 
                         scrollToBottom();
                     } else {
-                        // Show feedback buttons when animation completes
+                        // Show feedback buttons and speaker button when animation completes
                         feedbackButtons.setVisible(true);
+                        speakerButton.setVisible(true);
                     }
                 })
         );
@@ -401,7 +445,48 @@ public class ChatController {
         VBox messageContentBox = new VBox(messageNode);
         messageContentBox.getStyleClass().add("bot-message");
 
-        botMessageBox.getChildren().addAll(timestampLabel, messageContentBox);
+        // Create a container for the message content and speaker button
+        HBox messageWithSpeakerBox = new HBox(10);
+        messageWithSpeakerBox.setAlignment(Pos.CENTER_LEFT);
+
+        // Add speaker button
+        Button speakerButton = new Button();
+        speakerButton.getStyleClass().addAll("speaker-button", "modern-button");
+        FontIcon speakerIcon = new FontIcon("fa-volume-up");
+        speakerIcon.setIconSize(16);
+        speakerButton.setGraphic(speakerIcon);
+        speakerButton.setTooltip(new Tooltip("Listen to this message"));
+
+        // Set the action for the speaker button
+        speakerButton.setOnAction(e -> {
+            speakerButton.setDisable(true); // Disable button while processing
+
+            // Show a loading indicator on the button
+            FontIcon loadingIcon = new FontIcon("fa-spinner");
+            loadingIcon.setIconSize(16);
+            loadingIcon.getStyleClass().add("fa-spin");
+            speakerButton.setGraphic(loadingIcon);
+
+            // Process TTS in background
+            CompletableFuture.runAsync(() -> {
+                try {
+                    playTextToSpeech(message);
+                } catch (Exception ex) {
+                    Platform.runLater(() -> {
+                        showAlert("Error", "Could not play audio: " + ex.getMessage());
+                    });
+                } finally {
+                    Platform.runLater(() -> {
+                        // Restore original icon and enable button
+                        speakerButton.setGraphic(speakerIcon);
+                        speakerButton.setDisable(false);
+                    });
+                }
+            });
+        });
+
+        messageWithSpeakerBox.getChildren().addAll(messageContentBox, speakerButton);
+        botMessageBox.getChildren().addAll(timestampLabel, messageWithSpeakerBox);
 
         // Add feedback buttons
         HBox feedbackButtons = new HBox(5);
@@ -424,6 +509,36 @@ public class ChatController {
 
         chatContainer.getChildren().add(messageContainer);
         scrollToBottom();
+    }
+
+    /**
+     * Converts text to speech and plays the audio
+     * @param text The text to convert to speech
+     * @throws Exception If there's an error processing the audio
+     */
+    private void playTextToSpeech(String text) throws Exception {
+        // Get the audio data from the Groq API
+        byte[] audioData = groqService.convertTextToSpeech(text);
+
+        // Create a temporary file to store the audio data
+        File tempFile = File.createTempFile("tts_audio", ".wav");
+        tempFile.deleteOnExit();
+
+        // Write the audio data to the temporary file
+        try (FileOutputStream fos = new FileOutputStream(tempFile)) {
+            fos.write(audioData);
+        }
+
+        // Create a Media object from the temporary file
+        Media media = new Media(tempFile.toURI().toString());
+
+        // Create a MediaPlayer to play the audio
+        MediaPlayer mediaPlayer = new MediaPlayer(media);
+
+        // Play the audio
+        Platform.runLater(() -> {
+            mediaPlayer.play();
+        });
     }
 
     private void provideFeedback(String message, boolean helpful) {

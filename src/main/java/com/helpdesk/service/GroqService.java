@@ -17,6 +17,7 @@ import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
@@ -232,4 +233,47 @@ public class GroqService {
             e.printStackTrace();
             return "Error processing audio: " + e.getMessage();
         }
-    }}
+    }
+
+    /**
+     * Converts text to speech using the Groq TTS API
+     * @param text The text to convert to speech
+     * @return The audio data as a byte array
+     * @throws IOException If there's an error communicating with the API
+     */
+    public byte[] convertTextToSpeech(String text) throws IOException {
+        if (apiKey == null || apiKey.isEmpty()) {
+            throw new IOException("Please set up your Groq API key in settings.");
+        }
+
+        // Prepare request payload
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("model", Constants.GROQ_TTS_MODEL);
+        payload.put("input", text);
+        payload.put("voice", Constants.GROQ_TTS_VOICE);
+        payload.put("response_format", "wav");
+
+        // Create request
+        RequestBody requestBody = RequestBody.create(
+                MediaType.parse("application/json"),
+                gson.toJson(payload)
+        );
+
+        Request request = new Request.Builder()
+                .url(Constants.GROQ_TTS_API_URL)
+                .post(requestBody)
+                .addHeader("Authorization", "Bearer " + apiKey)
+                .addHeader("Content-Type", "application/json")
+                .build();
+
+        // Execute request with retry for 429 errors
+        try (Response response = executeWithRetry(() -> client.newCall(request).execute())) {
+            if (!response.isSuccessful()) {
+                throw new IOException("Error: " + response.code() + " - " + response.message());
+            }
+
+            // Return the audio data as a byte array
+            return response.body().bytes();
+        }
+    }
+}

@@ -794,3 +794,34 @@
     -fx-border-color: #bd2130;
     border-color: #bd2130;
 }
+
+/* Speaker Button Styles */
+.speaker-button {
+    -fx-background-color: #2D3748;
+    -fx-background-radius: 50%;
+    -fx-min-width: 36px;
+    -fx-min-height: 36px;
+    -fx-max-width: 36px;
+    -fx-max-height: 36px;
+    -fx-padding: 8px;
+    -fx-cursor: hand;
+    -fx-alignment: center;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 4, 0, 0, 1);
+}
+
+.speaker-button:hover {
+    -fx-background-color: #4299E1;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 6, 0, 0, 2);
+}
+
+.speaker-button:hover .ikonli-font-icon {
+    -fx-icon-color: #F7FAFC;
+}
+
+.speaker-button .ikonli-font-icon {
+    -fx-icon-color: #4299E1;
+}
+
+.modern-button {
+    -fx-transition: all 0.2s ease-in-out;
+}
