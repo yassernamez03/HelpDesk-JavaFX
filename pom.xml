@@ -106,6 +106,18 @@
             <version>4.12.0</version>
         </dependency>
 
+        <!-- Speech Recognition -->
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna</artifactId>
+            <version>5.13.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alphacephei</groupId>
+            <artifactId>vosk</artifactId>
+            <version>0.3.45</version>
+        </dependency>
+
         <!-- Game and visual components -->
         <dependency>
             <groupId>com.github.almasb</groupId>

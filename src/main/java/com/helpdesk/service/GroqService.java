@@ -1,30 +1,102 @@
 package com.helpdesk.service;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.helpdesk.util.Constants;
 import okhttp3.*;
+import okhttp3.MultipartBody;
+import okhttp3.MediaType;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import javax.sound.sampled.AudioFileFormat;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.Random;
 
 public class GroqService {
 
-    private static final String GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
+    @FunctionalInterface
+    private interface ApiCallSupplier {
+        Response call() throws IOException;
+    }
+
+    private static final String GROQ_API_URL = Constants.GROQ_API_URL;
+    private static final String GROQ_AUDIO_API_URL = Constants.GROQ_AUDIO_API_URL;
+    private static final int MAX_RETRIES = 5;
+    private static final int INITIAL_BACKOFF_MS = 1000; // 1 second
     private final OkHttpClient client;
     private final Gson gson;
-    private String apiKey;
+    private final Random random;
+    private String apiKey; // Groq API key
 
     public GroqService() {
-        this.client = new OkHttpClient();
+        // Create OkHttpClient with longer timeouts for audio processing
+        this.client = new OkHttpClient.Builder()
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .writeTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
+                .build();
         this.gson = new Gson();
-        // Load API key from environment or config
-        this.apiKey = "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";
+        this.random = new Random();
+        // Load API keys from environment or config
+        this.apiKey = "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";
     }
 
     public void setApiKey(String apiKey) {
         this.apiKey = apiKey;
+    }
+
+
+
+    private Response executeWithRetry(ApiCallSupplier apiCallSupplier) throws IOException {
+        int retries = 0;
+        int backoffMs = INITIAL_BACKOFF_MS;
+
+        while (true) {
+            Response response = apiCallSupplier.call();
+
+            // If successful or not a 429 error, return the response
+            if (response.isSuccessful() || response.code() != 429) {
+                return response;
+            }
+
+            // Close the response body to avoid resource leaks
+            if (response.body() != null) {
+                response.body().close();
+            }
+
+            // If we've reached max retries, throw an exception
+            if (retries >= MAX_RETRIES) {
+                throw new IOException("Maximum retries reached for API call after receiving 429 errors");
+            }
+
+            // Calculate backoff time with jitter (randomness to avoid all clients retrying at the same time)
+            int jitterMs = random.nextInt(backoffMs / 2);
+            int sleepTimeMs = backoffMs + jitterMs;
+
+            try {
+                Thread.sleep(sleepTimeMs);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new IOException("Retry interrupted", e);
+            }
+
+            // Increase backoff for next retry (exponential backoff)
+            backoffMs *= 2;
+            retries++;
+        }
     }
 
     public String processQuery(String userQuery) throws IOException {
@@ -34,7 +106,7 @@ public class GroqService {
 
         // Prepare request payload
         Map<String, Object> payload = new HashMap<>();
-        payload.put("model", "llama3-70b-8192"); // Choose appropriate model
+        payload.put("model", Constants.GROQ_MODEL); // Choose appropriate model
 
         Map<String, String> systemMessage = new HashMap<>();
         systemMessage.put("role", "system");
@@ -67,9 +139,12 @@ public class GroqService {
                 .addHeader("Content-Type", "application/json")
                 .build();
 
-        // Execute request
-        try (Response response = client.newCall(request).execute()) {
+        // Execute request with retry for 429 errors
+        try (Response response = executeWithRetry(() -> client.newCall(request).execute())) {
             if (!response.isSuccessful()) {
+                if (response.code() == 429) {
+                    return "Error: Too many requests. Please try again later.";
+                }
                 return "Error: " + response.code() + " - " + response.message();
             }
 
@@ -91,4 +166,70 @@ public class GroqService {
             return "Sorry, I couldn't process your request at this time.";
         }
     }
-}
+
+    public String convertSpeechToText(byte[] audioData) throws IOException {
+        if (apiKey == null || apiKey.isEmpty()) {
+            return "Please set up your Groq API key in settings.";
+        }
+
+        try {
+            // Convert raw PCM data to a proper WAV file with headers
+            AudioFormat format = new AudioFormat(
+                    AudioFormat.Encoding.PCM_SIGNED,
+                    16000.0f, // 16kHz sample rate
+                    16,       // 16-bit samples
+                    1,        // Mono
+                    2,        // Frame size (2 bytes for 16-bit mono)
+                    16000.0f, // Frame rate
+                    false     // Little endian
+            );
+
+            // Create a temporary file to store the WAV audio data
+            File tempFile = File.createTempFile("audio", ".wav");
+
+            // Convert raw PCM to WAV with proper headers
+            ByteArrayInputStream bais = new ByteArrayInputStream(audioData);
+            AudioInputStream audioInputStream = new AudioInputStream(
+                    bais,
+                    format,
+                    audioData.length / format.getFrameSize()
+            );
+
+            // Write the audio data to the temporary file as a WAV file
+            AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, tempFile);
+
+            // Create the request body using the temporary file
+            RequestBody fileBody = RequestBody.create(MediaType.parse("audio/wav"), tempFile);
+
+            RequestBody requestBody = new MultipartBody.Builder()
+                    .setType(MultipartBody.FORM)
+                    .addFormDataPart("file", "audio.wav", fileBody)
+                    .addFormDataPart("model", Constants.GROQ_WHISPER_MODEL)
+                    .addFormDataPart("language", "en")
+                    .build();
+
+            Request request = new Request.Builder()
+                    .url(GROQ_AUDIO_API_URL)
+                    .post(requestBody)
+                    .addHeader("Authorization", "Bearer " + apiKey)
+                    .build();
+
+            try (Response response = client.newCall(request).execute()) {
+                if (!response.isSuccessful()) {
+                    String errorBody = response.body() != null ? response.body().string() : "No error details";
+                    return "Error: " + response.code() + " - " + response.message() + ". Details: " + errorBody;
+                }
+
+                String responseBody = response.body().string();
+                JsonObject jsonResponse = JsonParser.parseString(responseBody).getAsJsonObject();
+
+                if (jsonResponse.has("text")) {
+                    return jsonResponse.get("text").getAsString();
+                }
+                return "Sorry, I couldn't transcribe your speech.";
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Error processing audio: " + e.getMessage();
+        }
+    }}

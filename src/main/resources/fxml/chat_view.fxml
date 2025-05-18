@@ -92,6 +92,14 @@
                     <HBox spacing="10" styleClass="input-area" alignment="CENTER">
                         <TextField fx:id="messageInput" promptText="Ask me anything about IT..."
                                 HBox.hgrow="ALWAYS" onAction="#sendMessage"/>
+                        <Button fx:id="recordButton" onAction="#toggleRecording" styleClass="record-button">
+                            <graphic>
+                                <FontIcon fx:id="micIcon" iconLiteral="fa-microphone" iconSize="16"/>
+                            </graphic>
+                            <tooltip>
+                                <Tooltip text="Record Voice Message" />
+                            </tooltip>
+                        </Button>
                         <Button text="Send" onAction="#sendMessage" styleClass="send-button"/>
                     </HBox>
                 </bottom>
@@ -116,7 +124,7 @@
                             <padding>
                                 <Insets top="15" right="15" bottom="15" left="15"/>
                             </padding>
-                            
+
                             <!-- Featured Courses Section -->
                             <VBox styleClass="section-container">
                                 <Label text="Featured Courses" styleClass="section-title"/>
@@ -133,7 +141,7 @@
                                             <Button text="Start Course" styleClass="course-button"/>
                                         </VBox>
                                     </VBox>
-                                    
+
                                     <!-- Demo Course Card 2 -->
                                     <VBox styleClass="course-card">
                                         <ImageView fitWidth="280" fitHeight="160" preserveRatio="true">
@@ -146,7 +154,7 @@
                                             <Button text="Start Course" styleClass="course-button"/>
                                         </VBox>
                                     </VBox>
-                                    
+
                                     <!-- Demo Course Card 3 -->
                                     <VBox styleClass="course-card">
                                         <ImageView fitWidth="280" fitHeight="160" preserveRatio="true">
@@ -213,7 +221,7 @@
                                     </Button>
                                 </FlowPane>
                             </VBox>
-                            
+
                             <!-- Regular Content Container -->
                             <VBox fx:id="kbContainer" spacing="15">
                                 <padding>

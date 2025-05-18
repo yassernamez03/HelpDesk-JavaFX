@@ -11,7 +11,9 @@ public class Constants {
 
     // API settings
     public static final String GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
+    public static final String GROQ_AUDIO_API_URL = "https://api.groq.com/openai/v1/audio/translations";
     public static final String GROQ_MODEL = "llama3-70b-8192";
+    public static final String GROQ_WHISPER_MODEL = "whisper-large-v3";
 
     // UI settings
     public static final int WINDOW_WIDTH = 380;

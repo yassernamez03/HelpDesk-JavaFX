@@ -78,6 +78,24 @@
     -fx-font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
 }
 
+.input-area .text-field.processing {
+    -fx-background-color: #EDF2F7;
+    -fx-border-color: #3182CE;
+    -fx-border-width: 2px;
+    -fx-border-radius: 24px;
+    -fx-effect: dropshadow(three-pass-box, rgba(49,130,206,0.5), 10, 0, 0, 0);
+    -fx-animation-name: pulse-border;
+    -fx-animation-duration: 2s;
+    -fx-animation-iteration-count: infinite;
+    -fx-animation-timing-function: ease-in-out;
+}
+
+@keyframes pulse-border {
+    0% { -fx-border-color: #3182CE; }
+    50% { -fx-border-color: #63B3ED; }
+    100% { -fx-border-color: #3182CE; }
+}
+
 .send-button {
     -fx-background-color: #4299E1;
     -fx-text-fill: white;
@@ -92,6 +110,39 @@
 .send-button:hover {
     -fx-background-color: #3182CE;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 8, 0, 0, 2);
+}
+
+.record-button {
+    -fx-background-color: #EDF2F7;
+    -fx-text-fill: #2D3748;
+    -fx-background-radius: 24px;
+    -fx-padding: 12px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 1);
+}
+
+.record-button:hover {
+    -fx-background-color: #E2E8F0;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 8, 0, 0, 2);
+}
+
+.record-button.recording {
+    -fx-background-color: #F56565;
+    -fx-effect: dropshadow(three-pass-box, rgba(245,101,101,0.3), 8, 0, 0, 2);
+    -fx-animation-name: pulse;
+    -fx-animation-duration: 1.5s;
+    -fx-animation-iteration-count: infinite;
+    -fx-animation-timing-function: ease-in-out;
+}
+
+.record-button.recording:hover {
+    -fx-background-color: #E53E3E;
+}
+
+@keyframes pulse {
+    0% { -fx-scale-x: 1; -fx-scale-y: 1; -fx-opacity: 1; }
+    50% { -fx-scale-x: 1.1; -fx-scale-y: 1.1; -fx-opacity: 0.8; }
+    100% { -fx-scale-x: 1; -fx-scale-y: 1; -fx-opacity: 1; }
 }
 
 .message-timestamp {

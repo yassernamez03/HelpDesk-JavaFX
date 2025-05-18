@@ -20,6 +20,18 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+import javafx.scene.paint.Color;
+import javax.sound.sampled.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -48,11 +60,23 @@ public class ChatController {
     private TextField messageInput;
 
     @FXML
+    private Button recordButton;
+
+    @FXML
+    private FontIcon micIcon;
+
+    // Audio recording components
+    private boolean isRecording = false;
+    private TargetDataLine audioLine;
+    private ByteArrayOutputStream audioData;
+    private Thread recordingThread;
+
+    @FXML
     private BorderPane chatView;
 
     @FXML
     private BorderPane knowledgeBaseView;
-    
+
     @FXML
     private BorderPane libraryView;
 
@@ -67,10 +91,10 @@ public class ChatController {
 
     @FXML
     private TextField searchField;
-    
+
     @FXML
     private TextField librarySearchField;
-    
+
     @FXML
     private TextField historySearchField;
 
@@ -146,7 +170,7 @@ public class ChatController {
         String theme = preferences.get("theme", "light");
         String mobileCssPath = theme.equals("dark") ? "/css/mobile-dark.css" : "/css/mobile-light.css";
         String libraryCssPath = theme.equals("dark") ? "/css/library-dark.css" : "/css/library-light.css";
-        
+
         Scene scene = chatView.getScene();
         if (scene != null) {
             scene.getStylesheets().clear();
@@ -155,7 +179,7 @@ public class ChatController {
                 getClass().getResource(libraryCssPath).toExternalForm()
             );
         }
-        
+
         // Initialize courses for the library
         loadCourses("");
     }
@@ -447,7 +471,7 @@ public class ChatController {
         libraryButton.getStyleClass().remove("nav-button-active");
         knowledgeBaseButton.getStyleClass().remove("nav-button-active");
         historyButton.getStyleClass().remove("nav-button-active");
-        
+
         // Add active state to the current button
         activeButton.getStyleClass().add("nav-button-active");
     }
@@ -484,7 +508,7 @@ public class ChatController {
     @FXML
     public void startNewChat() {
         chatContainer.getChildren().clear();
-        
+
         // Add welcome message
         addBotMessage("👋 Hi there! I'm your IT Support assistant. How can I help you today?", LocalDateTime.now());
 
@@ -533,7 +557,7 @@ public class ChatController {
         historyContainer.getChildren().clear();
         String searchQuery = historySearchField != null ? historySearchField.getText() : "";
         List<DatabaseService.Conversation> conversations = databaseService.getConversationHistory(searchQuery);
-        
+
         // Group conversations by date
         Map<LocalDateTime, List<DatabaseService.Conversation>> conversationsByDate = conversations.stream()
                 .collect(Collectors.groupingBy(
@@ -638,7 +662,7 @@ public class ChatController {
 
         Label timestampLabel = new Label(message.getTimestamp().format(timeFormatter));
         timestampLabel.getStyleClass().add("message-timestamp");
-        
+
         VBox contentBox = new VBox();
         if (message.isUser()) {
             Label contentLabel = new Label(message.getContent());
@@ -685,7 +709,7 @@ public class ChatController {
         // Solution content
         VBox solutionBox = new VBox(5);
         solutionBox.getStyleClass().add("kb-solution");
-        
+
         // Parse and format the solution steps
         String[] steps = entry.getSolution().split("\n");
         for (String step : steps) {
@@ -712,19 +736,19 @@ public class ChatController {
         // Optional feedback buttons
         HBox feedbackBox = new HBox(10);
         feedbackBox.setAlignment(Pos.CENTER_RIGHT);
-        
+
         Button helpfulButton = new Button("Helpful");
         helpfulButton.getStyleClass().addAll("kb-feedback-button", "helpful");
         FontIcon thumbsUpIcon = new FontIcon("fa-thumbs-up");
         thumbsUpIcon.setIconSize(14);
         helpfulButton.setGraphic(thumbsUpIcon);
-        
+
         Button notHelpfulButton = new Button("Not Helpful");
         notHelpfulButton.getStyleClass().addAll("kb-feedback-button", "not-helpful");
         FontIcon thumbsDownIcon = new FontIcon("fa-thumbs-down");
         thumbsDownIcon.setIconSize(14);
         notHelpfulButton.setGraphic(thumbsDownIcon);
-        
+
         feedbackBox.getChildren().addAll(helpfulButton, notHelpfulButton);
 
         // Add all components to the card
@@ -742,10 +766,10 @@ public class ChatController {
 
     private void loadCourses(String searchText) {
         if (coursesContainer == null) return;
-        
+
         coursesContainer.getChildren().clear();
         List<Course> courses = getCourses(); // This would normally come from a service
-        
+
         if (searchText != null && !searchText.isEmpty()) {
             courses = courses.stream()
                 .filter(course -> 
@@ -753,7 +777,7 @@ public class ChatController {
                     course.getDescription().toLowerCase().contains(searchText.toLowerCase()))
                 .collect(Collectors.toList());
         }
-        
+
         for (Course course : courses) {
             VBox courseCard = course.createCourseCard();
             coursesContainer.getChildren().add(courseCard);
@@ -778,5 +802,164 @@ public class ChatController {
             "/images/software-installation.jpg"
         ));
         return courses;
+    }
+
+    @FXML
+    public void toggleRecording() {
+        if (isRecording) {
+            stopRecording();
+        } else {
+            startRecording();
+        }
+    }
+
+    private void startRecording() {
+        try {
+            // Update UI to show recording state
+            isRecording = true;
+            micIcon.setIconLiteral("fa-microphone-slash");
+            micIcon.setIconColor(Color.RED);
+            recordButton.getStyleClass().add("recording");
+
+            // Configure audio format - use standard WAV format
+            AudioFormat format = new AudioFormat(
+                    AudioFormat.Encoding.PCM_SIGNED,
+                    16000.0f, // 16kHz sample rate
+                    16,       // 16-bit samples
+                    1,        // Mono
+                    2,        // Frame size (2 bytes for 16-bit mono)
+                    16000.0f, // Frame rate
+                    false     // Little endian
+            );
+
+            // Get and open the target data line
+            DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
+            if (!AudioSystem.isLineSupported(info)) {
+                showAlert("Error", "Audio recording is not supported on this system.");
+                return;
+            }
+
+            audioLine = (TargetDataLine) AudioSystem.getLine(info);
+            audioLine.open(format);
+            audioLine.start();
+
+            // Create a stream to hold the captured data
+            audioData = new ByteArrayOutputStream();
+
+            // Create a thread to capture the audio data
+            recordingThread = new Thread(() -> {
+                byte[] buffer = new byte[4096];
+                int bytesRead;
+
+                try {
+                    while (isRecording) {
+                        bytesRead = audioLine.read(buffer, 0, buffer.length);
+                        if (bytesRead > 0) {
+                            audioData.write(buffer, 0, bytesRead);
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    showAlert("Error", "Failed to start recording: " + e.getMessage());
+                    isRecording = false;
+                }
+            });
+
+            recordingThread.start();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Error", "Failed to start recording: " + e.getMessage());
+            isRecording = false;
+        }
+    }
+
+    private void stopRecording() {
+        if (!isRecording) return;
+
+        // Update UI to show stopped state
+        isRecording = false;
+        micIcon.setIconLiteral("fa-microphone");
+        micIcon.setIconColor(Color.BLACK);
+        recordButton.getStyleClass().remove("recording");
+
+        // Stop and close the audio line
+        if (audioLine != null) {
+            audioLine.stop();
+            audioLine.close();
+        }
+
+        // Wait for the recording thread to finish
+        try {
+            if (recordingThread != null) {
+                recordingThread.join();
+            }
+
+            // Process the recorded audio
+            if (audioData != null && audioData.size() > 0) {
+                processRecordedAudio();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Error", "Failed to process recording: " + e.getMessage());
+        }
+    }
+
+    private void processRecordedAudio() {
+        // Show a processing message and visual indicator
+        Platform.runLater(() -> {
+            messageInput.setText("Processing voice message...");
+            messageInput.setDisable(true);
+            messageInput.getStyleClass().add("processing"); // Add processing style
+        });
+
+        // Process the audio data asynchronously
+        CompletableFuture.runAsync(() -> {
+            try {
+                // Get the audio data as a byte array
+                byte[] audioBytes = audioData.toByteArray();
+
+                // Convert speech to text using GroqService
+                String recognizedText = groqService.convertSpeechToText(audioBytes);
+
+                // Update the UI with the recognized text
+                Platform.runLater(() -> {
+                    // Remove processing style
+                    messageInput.getStyleClass().remove("processing");
+
+                    if (recognizedText.startsWith("Error") || recognizedText.startsWith("Please set up")) {
+                        // Show error message
+                        showAlert("Speech Recognition Error", recognizedText);
+                        messageInput.setText("");
+                    } else {
+                        // Show the transcribed text
+                        messageInput.setText(recognizedText);
+                    }
+                    messageInput.setDisable(false);
+                    messageInput.requestFocus();
+                });
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                Platform.runLater(() -> {
+                    // Remove processing style
+                    messageInput.getStyleClass().remove("processing");
+
+                    showAlert("Error", "Failed to process audio: " + e.getMessage());
+                    messageInput.setText("");
+                    messageInput.setDisable(false);
+                });
+            }
+        });
+    }
+
+    private void showAlert(String title, String content) {
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle(title);
+            alert.setHeaderText(null);
+            alert.setContentText(content);
+            alert.showAndWait();
+        });
     }
 }

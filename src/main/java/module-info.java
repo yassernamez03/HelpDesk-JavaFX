@@ -23,7 +23,10 @@ module com.helpdesk {
     requires flexmark.util.ast;
     requires flexmark.util.data;
     requires flexmark.util.misc;
-    
+
+    // No longer using vosk or JNA for speech recognition
+    // Using OpenAI's Whisper API through HTTP requests instead
+
     opens com.helpdesk to javafx.fxml;
     exports com.helpdesk;
     exports com.helpdesk.controller;
