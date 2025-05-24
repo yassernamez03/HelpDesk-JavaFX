@@ -15,7 +15,9 @@ public class Main extends Application {
         // Set minimum width/height to make it mobile-like
         primaryStage.setMinWidth(380);
         primaryStage.setMinHeight(650);
-        primaryStage.setTitle("IT Support Helpdesk");        Scene scene = new Scene(root, 800, 650);
+        // Remove window decoration (title bar)
+        primaryStage.initStyle(javafx.stage.StageStyle.UNDECORATED);
+        Scene scene = new Scene(root, 800, 650);
         scene.getStylesheets().addAll(
             getClass().getResource("/css/mobile-light.css").toExternalForm(),
             getClass().getResource("/css/library-light.css").toExternalForm(),

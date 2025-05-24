@@ -73,6 +73,14 @@
                                 <Tooltip text="New Chat" />
                             </tooltip>
                         </Button>
+                        <Button fx:id="exitButton" onAction="#exitApplication" styleClass="header-button">
+                            <graphic>
+                                <FontIcon iconLiteral="fa-times" iconSize="16"/>
+                            </graphic>
+                            <tooltip>
+                                <Tooltip text="Exit" />
+                            </tooltip>
+                        </Button>
                     </HBox>
                 </top>
 
@@ -110,6 +118,14 @@
                         <HBox styleClass="header" alignment="CENTER_LEFT">
                             <Label text="Course Library" styleClass="header-text"/>
                             <Pane HBox.hgrow="ALWAYS" />
+                            <Button fx:id="exitButtonLibrary" onAction="#exitApplication" styleClass="header-button">
+                                <graphic>
+                                    <FontIcon iconLiteral="fa-times" iconSize="16"/>
+                                </graphic>
+                                <tooltip>
+                                    <Tooltip text="Exit" />
+                                </tooltip>
+                            </Button>
                         </HBox>
                         <TextField fx:id="librarySearchField" promptText="Search courses..."
                                 styleClass="search-field">
@@ -181,6 +197,14 @@
                         <HBox styleClass="header" alignment="CENTER_LEFT">
                             <Label text="Knowledge Base" styleClass="header-text"/>
                             <Pane HBox.hgrow="ALWAYS" />
+                            <Button fx:id="exitButtonKB" onAction="#exitApplication" styleClass="header-button">
+                                <graphic>
+                                    <FontIcon iconLiteral="fa-times" iconSize="16"/>
+                                </graphic>
+                                <tooltip>
+                                    <Tooltip text="Exit" />
+                                </tooltip>
+                            </Button>
                         </HBox>
                         <TextField fx:id="searchField" promptText="Search knowledge base..."
                                 styleClass="search-field">
@@ -240,6 +264,14 @@
                         <HBox styleClass="header" alignment="CENTER_LEFT">
                             <Label text="Chat History" styleClass="header-text"/>
                             <Pane HBox.hgrow="ALWAYS" />
+                            <Button fx:id="exitButtonHistory" onAction="#exitApplication" styleClass="header-button">
+                                <graphic>
+                                    <FontIcon iconLiteral="fa-times" iconSize="16"/>
+                                </graphic>
+                                <tooltip>
+                                    <Tooltip text="Exit" />
+                                </tooltip>
+                            </Button>
                         </HBox>
                         <TextField fx:id="historySearchField" promptText="Search conversations..."
                                 styleClass="search-field">

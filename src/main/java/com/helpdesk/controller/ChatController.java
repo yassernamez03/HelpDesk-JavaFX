@@ -511,11 +511,7 @@ public class ChatController {
         scrollToBottom();
     }
 
-    /**
-     * Converts text to speech and plays the audio
-     * @param text The text to convert to speech
-     * @throws Exception If there's an error processing the audio
-     */
+
     private void playTextToSpeech(String text) throws Exception {
         // Get the audio data from the Groq API
         byte[] audioData = groqService.convertTextToSpeech(text);
@@ -1076,5 +1072,13 @@ public class ChatController {
             alert.setContentText(content);
             alert.showAndWait();
         });
+    }
+
+    /**
+     * Exits the application when the exit button is clicked
+     */
+    @FXML
+    public void exitApplication() {
+        Platform.exit();
     }
 }
