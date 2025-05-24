@@ -16,7 +16,7 @@ public class Constants {
     public static final String GROQ_MODEL = "llama3-70b-8192";
     public static final String GROQ_WHISPER_MODEL = "whisper-large-v3";
     public static final String GROQ_TTS_MODEL = "playai-tts";
-    public static final String GROQ_TTS_VOICE = "Fritz-PlayAI";
+    public static final String GROQ_TTS_VOICE = "Celeste-PlayAI";
 
     // UI settings
     public static final int WINDOW_WIDTH = 380;

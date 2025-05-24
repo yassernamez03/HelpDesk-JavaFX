@@ -708,6 +708,10 @@
     border-radius: 4px;
 }
 
+.header-button .ikonli-font-icon {
+    -fx-icon-color: #ffffff;
+}
+
 .conversation-preview {
     -fx-background-color: transparent;
     background-color: transparent;
@@ -814,7 +818,7 @@
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 6, 0, 0, 2);
 }
 
-.speaker-button:hover .ikonli-font-icon {
+.speaker-button .ikonli-font-icon {
     -fx-icon-color: #F7FAFC;
 }
 
@@ -822,6 +826,14 @@
     -fx-icon-color: #4299E1;
 }
 
+.kb-botton .ikonli-font-icon {
+    -fx-icon-color: #f7f7f7;
+}
+
 .modern-button {
     -fx-transition: all 0.2s ease-in-out;
+}
+
+.record-button .ikonli-font-icon {
+    -fx-icon-color: #F7FAFC;
 }
