@@ -41,9 +41,7 @@ public class SettingsController {
         boolean isDark = theme.equals("dark");
         themeToggle.setSelected(isDark);
         themeToggle.setText(isDark ? "Dark Mode" : "Light Mode");
-    }
-
-    @FXML
+    }    @FXML
     public void toggleTheme() {
         boolean isDark = themeToggle.isSelected();
         String theme = isDark ? "dark" : "light";
@@ -51,30 +49,45 @@ public class SettingsController {
 
         themeToggle.setText(isDark ? "Dark Mode" : "Light Mode");
 
-        String cssPath = isDark
-                ? "/css/mobile-dark.css"
-                : "/css/mobile-light.css";
-        String cssResource = getClass().getResource(cssPath).toExternalForm();
+        // Load all required CSS files for the theme
+        String mobileCssPath = isDark ? "/css/mobile-dark.css" : "/css/mobile-light.css";
+        String libraryCssPath = isDark ? "/css/library-dark.css" : "/css/library-light.css";
+        String kbCssPath = isDark ? "/css/kb-dark.css" : "/css/kb-light.css";
+        String navCssPath = isDark ? "/css/nav-dark.css" : "/css/nav-light.css";
 
         for (Window window : Stage.getWindows()) {
             if (window instanceof Stage) {
                 Scene scene = ((Stage) window).getScene();
                 if (scene != null) {
-                    applyThemeToScene(scene, cssResource);
+                    applyThemeToScene(scene, mobileCssPath, libraryCssPath, kbCssPath, navCssPath);
                 }
             }
         }
 
+        // Force refresh of all controllers that might have cached styles
+        notifyControllersOfThemeChange();
+
         showAlert(Alert.AlertType.INFORMATION, "Theme Applied",
                 "The " + theme + " theme has been applied to all windows.");
     }
-
-
-    private void applyThemeToScene(Scene scene, String cssResource) {
+    
+    private void notifyControllersOfThemeChange() {
+        // This method will trigger theme refresh in controllers that support it
+        // We'll use a workaround by updating the preferences timestamp
+        preferences.putLong("themeChangeTimestamp", System.currentTimeMillis());
+    }
+    private void applyThemeToScene(Scene scene, String... cssResources) {
         if (scene == null) return;
 
         scene.getStylesheets().clear();
-        scene.getStylesheets().add(cssResource);
+        for (String cssPath : cssResources) {
+            try {
+                String cssResource = getClass().getResource(cssPath).toExternalForm();
+                scene.getStylesheets().add(cssResource);
+            } catch (Exception e) {
+                System.err.println("Failed to load CSS: " + cssPath + " - " + e.getMessage());
+            }
+        }
     }
 
     @FXML

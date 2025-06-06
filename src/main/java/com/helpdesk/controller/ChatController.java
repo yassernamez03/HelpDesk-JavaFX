@@ -164,20 +164,26 @@ public class ChatController {
                 loadCourses(newValue);
             });
         }
-    }
-
-    private void applyCurrentTheme() {
+    }    private void applyCurrentTheme() {
         String theme = preferences.get("theme", "light");
         String mobileCssPath = theme.equals("dark") ? "/css/mobile-dark.css" : "/css/mobile-light.css";
         String libraryCssPath = theme.equals("dark") ? "/css/library-dark.css" : "/css/library-light.css";
+        String kbCssPath = theme.equals("dark") ? "/css/kb-dark.css" : "/css/kb-light.css";
+        String navCssPath = theme.equals("dark") ? "/css/nav-dark.css" : "/css/nav-light.css";
 
         Scene scene = chatView.getScene();
         if (scene != null) {
             scene.getStylesheets().clear();
-            scene.getStylesheets().addAll(
-                getClass().getResource(mobileCssPath).toExternalForm(),
-                getClass().getResource(libraryCssPath).toExternalForm()
-            );
+            try {
+                scene.getStylesheets().addAll(
+                    getClass().getResource(mobileCssPath).toExternalForm(),
+                    getClass().getResource(libraryCssPath).toExternalForm(),
+                    getClass().getResource(kbCssPath).toExternalForm(),
+                    getClass().getResource(navCssPath).toExternalForm()
+                );
+            } catch (Exception e) {
+                System.err.println("Failed to load CSS for theme: " + e.getMessage());
+            }
         }
 
         // Initialize courses for the library

@@ -167,7 +167,7 @@
                     <execution>
                         <id>default-cli</id>
                         <configuration>
-                            <mainClass>com.helpdesk.HelloApplication</mainClass>
+                            <mainClass>com.helpdesk.Main</mainClass>
                         </configuration>
                     </execution>
                 </executions>

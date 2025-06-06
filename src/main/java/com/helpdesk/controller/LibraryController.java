@@ -1,11 +1,16 @@
 package com.helpdesk.controller;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
+import javafx.util.Duration;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.prefs.Preferences;
 import com.helpdesk.model.Course;
 
 public class LibraryController {
@@ -19,9 +24,10 @@ public class LibraryController {
     private VBox libraryView;
 
     private List<Course> courses;
-
-    @FXML
+    private Preferences preferences;    @FXML
     public void initialize() {
+        preferences = Preferences.userNodeForPackage(LibraryController.class);
+        
         // Initialize courses list
         courses = new ArrayList<>();
         loadCourses();
@@ -30,6 +36,77 @@ public class LibraryController {
         searchField.textProperty().addListener((observable, oldValue, newValue) -> {
             filterCourses(newValue);
         });
+        
+        // Listen for theme changes
+        setupThemeChangeListener();
+        
+        // Apply current theme after the scene is set
+        libraryView.sceneProperty().addListener((observable, oldScene, newScene) -> {
+            if (newScene != null) {
+                applyCurrentTheme();
+            }
+        });
+        
+        // Apply theme if scene is already set
+        if (libraryView.getScene() != null) {
+            applyCurrentTheme();
+        }
+    }
+    
+    private void setupThemeChangeListener() {
+        // Create a timer to periodically check for theme changes
+        javafx.animation.Timeline timeline = new javafx.animation.Timeline(
+            new javafx.animation.KeyFrame(javafx.util.Duration.millis(500), e -> {
+                // Check if theme has changed by comparing timestamps
+                long lastThemeChange = preferences.getLong("themeChangeTimestamp", 0);
+                long lastKnownChange = preferences.getLong("lastKnownThemeChange", 0);
+                
+                if (lastThemeChange > lastKnownChange) {
+                    preferences.putLong("lastKnownThemeChange", lastThemeChange);
+                    applyCurrentTheme();
+                }
+            })
+        );
+        timeline.setCycleCount(javafx.animation.Timeline.INDEFINITE);
+        timeline.play();
+    }
+    
+    public void applyCurrentTheme() {
+        String theme = preferences.get("theme", "light");
+        String mobileCssPath = theme.equals("dark") ? "/css/mobile-dark.css" : "/css/mobile-light.css";
+        String libraryCssPath = theme.equals("dark") ? "/css/library-dark.css" : "/css/library-light.css";
+        String kbCssPath = theme.equals("dark") ? "/css/kb-dark.css" : "/css/kb-light.css";
+        String navCssPath = theme.equals("dark") ? "/css/nav-dark.css" : "/css/nav-light.css";
+
+        Scene scene = libraryView.getScene();
+        if (scene != null) {
+            scene.getStylesheets().clear();
+            
+            // Add CSS files in the correct order to prevent conflicts
+            try {
+                scene.getStylesheets().addAll(
+                    getClass().getResource(mobileCssPath).toExternalForm(),
+                    getClass().getResource(libraryCssPath).toExternalForm(),
+                    getClass().getResource(kbCssPath).toExternalForm(),
+                    getClass().getResource(navCssPath).toExternalForm()
+                );
+            } catch (Exception e) {
+                System.err.println("Failed to load CSS for library theme: " + e.getMessage());
+            }
+            
+            // Refresh the course display to ensure proper styling
+            refreshCourseDisplay();
+        }
+    }
+    
+    private void refreshCourseDisplay() {
+        // Re-display courses to apply new styling
+        String currentSearchText = searchField.getText();
+        if (currentSearchText == null || currentSearchText.isEmpty()) {
+            displayCourses(courses);
+        } else {
+            filterCourses(currentSearchText);
+        }
     }
 
     private void loadCourses() {

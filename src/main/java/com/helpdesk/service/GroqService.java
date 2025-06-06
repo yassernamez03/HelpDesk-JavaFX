@@ -52,7 +52,7 @@ public class GroqService {
         this.gson = new Gson();
         this.random = new Random();
         // Load API keys from environment or config
-        this.apiKey = "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";
+        this.apiKey = "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";
     }
 
     public void setApiKey(String apiKey) {
